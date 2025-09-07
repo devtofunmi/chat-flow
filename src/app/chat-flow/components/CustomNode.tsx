@@ -10,12 +10,12 @@ const CustomNode = ({ data }: CustomNodeProps) => {
     <div
       className="relative rounded-2xl border border-gray-300 bg-white flex items-center justify-center"
       style={{
-        width: "160px",
+        width: "170px",
         height: "60px", 
       }}
     >
 
-      <div className="!text-gray-500 text-md text-center">{data.label}</div>
+      <div className="!text-gray-500 text-sm text-center">{data.label}</div>
 
       <Handle
         type="target"

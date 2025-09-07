@@ -12,51 +12,14 @@ export function NodeInspectorPanel({ node, onClose }: NodeInspectorPanelProps) {
     return null;
   }
 
-  const panelStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    width: '350px',
-    height: '100%',
-    backgroundColor: 'rgba(248, 249, 250, 0.95)',
-    borderLeft: '1px solid #dee2e6',
-    boxShadow: '-2px 0 5px rgba(0,0,0,0.1)',
-    padding: '20px',
-    boxSizing: 'border-box',
-    zIndex: 10,
-    overflowY: 'auto',
-    fontFamily: 'monospace',
-    fontSize: '12px',
-    color: '#343a40'
-  };
-
-  const closeButtonStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: '10px',
-    right: '10px',
-    background: 'transparent',
-    border: 'none',
-    fontSize: '18px',
-    cursor: 'pointer',
-  };
-
-  const preStyle: React.CSSProperties = {
-    whiteSpace: 'pre-wrap',
-    wordWrap: 'break-word',
-    backgroundColor: '#fff',
-    border: '1px solid #ced4da',
-    padding: '10px',
-    borderRadius: '4px',
-  };
-
   return (
-    <div style={panelStyle}>
-      <button onClick={onClose} style={closeButtonStyle}>&times;</button>
+    <div className="absolute top-0 right-0 w-[350px] h-full bg-white border-l border-gray-200 shadow-lg p-5 box-border z-10 overflow-y-auto font-mono text-xs text-gray-800">
+      <button onClick={onClose} className="absolute top-2.5 right-2.5 bg-transparent border-none text-lg cursor-pointer">&times;</button>
       <h3>Node Details</h3>
       <hr />
       <strong>ID:</strong> {node.id}
-      <h4 style={{ marginTop: '20px' }}>Payload (node.data)</h4>
-      <pre style={preStyle}>
+      <h4 className="mt-5">Payload (node.data)</h4>
+      <pre className="whitespace-pre-wrap break-words bg-white border border-gray-300 p-2.5 rounded">
         <code>{JSON.stringify(node.data, null, 2)}</code>
       </pre>
     </div>

@@ -15,7 +15,7 @@ import { components, tools as staticTools } from "@/lib/tambo";
 import { TamboProvider, TamboTool } from "@tambo-ai/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
-import { ChatFlow, useFlowState } from "@/components/tambo/chat-flow";
+import { ChatFlow, useFlowState } from "./components/chat-flow";
 import { z } from "zod";
 
 export default function ChatFlowPage() {

@@ -13,6 +13,7 @@ import {
   OnEdgesChange,
   OnConnect,
   BackgroundVariant,
+  Position,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import CustomNode from './CustomNode';
@@ -42,10 +43,10 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'TB') => 
   const layoutedNodes = nodes.map((node) => {
     const nodeWithPosition = dagreGraph.node(node.id);
     // We are creating a new object to ensure React detects the change.
-    const updatedNode = {
+    const updatedNode: Node = {
       ...node,
-      targetPosition: isHorizontal ? 'left' : 'top',
-      sourcePosition: isHorizontal ? 'right' : 'bottom',
+      targetPosition: isHorizontal ? Position.Left : Position.Top,
+      sourcePosition: isHorizontal ? Position.Right : Position.Bottom,
       position: {
         x: nodeWithPosition.x - nodeWidth / 2,
         y: nodeWithPosition.y - nodeHeight / 2,
@@ -145,7 +146,7 @@ export function useFlowState() {
         [setEdges]
     );
 
-    const addNode = useCallback(({ id, data, x, y }: { id: string, data: any, x: number, y: number }) => {
+    const addNode = useCallback(({ id, data, x, y }: { id: string, data: { label: string }, x: number, y: number }) => {
         const newNode: Node = {
             id,
             type: 'custom',

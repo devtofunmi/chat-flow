@@ -41,7 +41,11 @@ export default function ChatFlowPage() {
       toolSchema: z.function().args(
         z.object({
           id: z.string().describe("A unique identifier for the node."),
-          data: z.any().describe("The data payload for the node."),
+          data: z.object({ // Changed z.any() to z.object()
+            label: z.string().describe("The text to display on the node."),
+            messageType: z.string().optional().describe("The type of message (e.g., 'user', 'ai', 'tool', 'error')."),
+            payload: z.any().optional().describe("The detailed payload for the node."),
+          }).describe("The data payload for the node."),
           x: z.number().describe("The x-coordinate for the node's position."),
           y: z.number().describe("The y-coordinate for the node's position."),
         })
@@ -113,9 +117,10 @@ export default function ChatFlowPage() {
                   Chat Flow
                 </h2>
                <p className="text-sm text-gray-600 mt-1">
-                 Try: &quot;Draw a 5-step user authentication flow with connected nodes. 
-                Each node label = step name. Each node&apos;s data includes a payload object with &#123; description, security_risk (1-5) &#125;.&quot;
+                 Try: &quot;Draw a 7-step network troubleshooting flow. Connect nodes sequentially. Each node&apos;s `label` = step name. `data` includes `payload` with `description`.
+                  Assign `messageType` for each step: 'user' (steps 1, 6), 'ai' (steps 2, 5), 'tool' (step 3), 'error' (step 4), 'default' (step 7).&quot;
                </p>
+
 
               </div>
 
@@ -156,7 +161,7 @@ export default function ChatFlowPage() {
         <div className="flex-1 overflow-auto relative">
           <button
             onClick={recalculateLayout}
-            className="absolute cursor-pointer top-4 right-4 z-10 bg-[#333333] hover:bg-black/80 text-white  py-2 px-3 rounded-lg"
+            className="absolute cursor-pointer top-4 right-4 z-10 hover:bg-[#333333] bg-black/90 text-white  py-2 px-3 rounded-lg"
           >
             Recalculate Layout
           </button>

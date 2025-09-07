@@ -149,7 +149,7 @@ export function useFlowState() {
         [setEdges]
     );
 
-    const addNode = useCallback(({ id, data, x, y }: { id: string, data: { label: string }, x: number, y: number }) => {
+    const addNode = useCallback(({ id, data, x, y }: { id: string, data: { label: string; messageType?: string }, x: number, y: number }) => {
         const newNode: Node = {
             id,
             type: 'custom',

@@ -16,6 +16,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import CustomNode from './CustomNode';
+import { NodeInspectorPanel } from './node-inspector-panel';
 
 // Initial state for the flow chart
 const initialNodes: Node[] = [];
@@ -40,6 +41,16 @@ interface ChatFlowProps {
 }
 
 export function ChatFlow({ nodes, edges, onNodesChange, onEdgesChange, onConnect }: ChatFlowProps) {
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+
+  const handleNodeClick = (_: React.MouseEvent, node: Node) => {
+    setSelectedNode(node);
+  };
+
+  const handlePanelClose = () => {
+    setSelectedNode(null);
+  };
+
   return (
     <div style={{ height: '100%', width: '100%', position: 'relative' }}>
       <div 
@@ -59,7 +70,7 @@ export function ChatFlow({ nodes, edges, onNodesChange, onEdgesChange, onConnect
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
-        fitView
+        onNodeClick={handleNodeClick}
         nodeTypes={nodeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
         style={{ position: 'relative', zIndex: 1 }}
@@ -67,6 +78,7 @@ export function ChatFlow({ nodes, edges, onNodesChange, onEdgesChange, onConnect
         <Controls />
         <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
       </ReactFlow>
+      <NodeInspectorPanel node={selectedNode} onClose={handlePanelClose} />
     </div>
   );
 }
@@ -91,15 +103,15 @@ export function useFlowState() {
         [setEdges]
     );
 
-    const addNode = useCallback(({ id, label, x, y }: { id: string, label: string, x: number, y: number }) => {
+    const addNode = useCallback(({ id, data, x, y }: { id: string, data: any, x: number, y: number }) => {
         const newNode: Node = {
             id,
             type: 'custom',
             position: { x, y },
-            data: { label },
+            data,
         };
         setNodes((nds) => [...nds, newNode]);
-        return `Successfully added node ${label} with id ${id}.`;
+        return `Successfully added node with id ${id}.`;
     }, [setNodes]);
 
     const addEdge = useCallback(({ source, target }: { source: string, target: string }) => {

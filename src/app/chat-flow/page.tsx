@@ -31,7 +31,7 @@ export default function ChatFlowPage() {
       toolSchema: z.function().args(
         z.object({
           id: z.string().describe("A unique identifier for the node."),
-          label: z.string().describe("The text to display on the node."),
+          data: z.any().describe("The data payload for the node."),
           x: z.number().describe("The x-coordinate for the node's position."),
           y: z.number().describe("The y-coordinate for the node's position."),
         })
@@ -103,7 +103,9 @@ export default function ChatFlowPage() {
                   Chat Flow
                 </h2>
                 <p className="text-sm text-gray-600 mt-1">
-                  Try: "Draw a flow chart for a signup system"
+                  Try: "Draw a simple 3-step user authentication flow, connecting the steps in sequence.
+                   For each node, the label should be the step name. Also, add a payload object to each node's data
+                    containing a description of the step and a security_risk level from 1 to 5."
                 </p>
               </div>
 

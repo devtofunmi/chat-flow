@@ -17,6 +17,7 @@
     "@tambo-ai/typescript-sdk": "^0.69.0",
     "@xyflow/react": "^12.8.4",
     "class-variance-authority": "^0.7.1",
+    "dagre": "^0.8.5",
     "dompurify": "^3.2.6",
     "framer-motion": "^12.23.12",
     "highlight.js": "^11.11.1",

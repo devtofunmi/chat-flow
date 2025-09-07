@@ -1,7 +1,11 @@
 import React from "react";
 import { Handle, Position } from "@xyflow/react";
 
-const CustomNode = ({ data }) => {
+interface CustomNodeProps {
+  data: { label: string };
+}
+
+const CustomNode = ({ data }: CustomNodeProps) => {
   return (
     <div
       className="relative rounded-2xl border border-gray-300 bg-white flex items-center justify-center"

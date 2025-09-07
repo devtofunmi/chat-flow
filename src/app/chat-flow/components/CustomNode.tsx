@@ -10,7 +10,7 @@ const CustomNode = ({ data }: CustomNodeProps) => {
     <div
       className="relative rounded-2xl border border-gray-300 bg-white flex items-center justify-center"
       style={{
-        width: "170px",
+        width: "180px",
         height: "60px", 
       }}
     >

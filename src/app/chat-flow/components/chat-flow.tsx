@@ -14,7 +14,7 @@ import {
   OnConnect,
   BackgroundVariant,
   Position,
-  MiniMap, // <-- Added MiniMap import
+  MiniMap, 
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import CustomNode from './CustomNode';
@@ -118,11 +118,11 @@ export function ChatFlow({ nodes, edges, onNodesChange, onEdgesChange, onConnect
         nodeTypes={nodeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
         style={{ position: 'relative', zIndex: 1 }}
-        proOptions={{ hideAttribution: true }} // <-- Added proOptions
+        proOptions={{ hideAttribution: true }} 
       >
         <Controls />
         <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
-        <MiniMap /> {/* <-- Added MiniMap component */}
+        <MiniMap /> 
       </ReactFlow>
       <NodeInspectorPanel node={selectedNode} onClose={handlePanelClose} />
     </div>

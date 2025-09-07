@@ -113,8 +113,8 @@ export default function ChatFlowPage() {
                   Chat Flow
                 </h2>
                <p className="text-sm text-gray-600 mt-1">
-                 Try: "Draw a 5-step user authentication flow with connected nodes. 
-                Each node label = step name. Each node&apos;s data includes a payload object with &#123; description, security_risk (1-5) &#125;."
+                 Try: &quot;Draw a 5-step user authentication flow with connected nodes. 
+                Each node label = step name. Each node&apos;s data includes a payload object with &#123; description, security_risk (1-5) &#125;.&quot;
                </p>
 
               </div>

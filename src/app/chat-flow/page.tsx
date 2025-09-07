@@ -102,11 +102,11 @@ export default function ChatFlowPage() {
                 <h2 className="text-lg font-semibold text-gray-900">
                   Chat Flow
                 </h2>
-                <p className="text-sm text-gray-600 mt-1">
-                  Try: "Draw a simple 3-step user authentication flow, connecting the steps in sequence.
-                   For each node, the label should be the step name. Also, add a payload object to each node's data
-                    containing a description of the step and a security_risk level from 1 to 5."
-                </p>
+               <p className="text-sm text-gray-600 mt-1">
+                 Try: "Draw a 3-step user authentication flow with connected nodes. 
+                Each node label = step name. Each node&apos;s data includes a payload object with &#123; description, security_risk (1-5) &#125;."
+               </p>
+
               </div>
 
               <ScrollableMessageContainer className="flex-1 p-4">

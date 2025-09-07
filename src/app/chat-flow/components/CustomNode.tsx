@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { Handle, Position } from "@xyflow/react";
+import { ChevronDown, ChevronUp } from "lucide-react"; 
 
 interface CustomNodeProps {
-  data: { label: string; messageType?: string };
+  data: { label: string; messageType?: string; payload?: any }; // Add payload to data interface
 }
 
 const nodeStyles: { [key: string]: React.CSSProperties } = {
@@ -29,18 +30,43 @@ const nodeStyles: { [key: string]: React.CSSProperties } = {
 };
 
 const CustomNode = ({ data }: CustomNodeProps) => {
+  const [isExpanded, setIsExpanded] = useState(false); // State for expand/collapse
   const style = nodeStyles[data.messageType || "default"];
+
+  const toggleExpand = (event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent React Flow from moving the node
+    setIsExpanded(!isExpanded);
+  };
 
   return (
     <div
-      className="relative rounded-2xl border flex items-center justify-center"
+      className="relative rounded-2xl border flex flex-col items-center justify-center pt-2 pb-2 px-4"
       style={{
         width: "180px",
-        height: "60px",
-        ...style, // Apply dynamic styles
+        minHeight: "60px",
+        height: isExpanded ? "auto" : "60px", 
+        ...style,
       }}
     >
-      <div className="!text-gray-800 text-sm text-center px-2">{data.label}</div>
+
+      <div className="!text-gray-800 text-sm flex items-center justify-center flex-1">{data.label}</div>
+      {data.payload && ( // Only show button if there's a payload
+        <button
+          onClick={toggleExpand}
+          className="absolute top-1 right-1 p-1 rounded-full hover:bg-gray-200" 
+          style={{ lineHeight: 0 }} // Remove extra line height
+        >
+          {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </button>
+      )}
+
+      {isExpanded && data.payload && (
+        <div className="mt-2 text-xs text-gray-700 text-left w-full overflow-auto max-h-40"> 
+          <pre className="bg-gray-100 p-1 rounded overflow-auto text-left" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+            <code>{JSON.stringify(data.payload, null, 2)}</code>
+          </pre>
+        </div>
+      )}
 
       <Handle
         type="target"

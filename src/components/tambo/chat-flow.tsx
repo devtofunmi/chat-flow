@@ -12,12 +12,24 @@ import {
   OnNodesChange,
   OnEdgesChange,
   OnConnect,
+  BackgroundVariant,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import CustomNode from './CustomNode';
 
 // Initial state for the flow chart
 const initialNodes: Node[] = [];
 const initialEdges: Edge[] = [];
+
+const nodeTypes = {
+  custom: CustomNode,
+};
+
+const defaultEdgeOptions = {
+  animated: true,
+  type: 'smoothstep',
+  style: { strokeDasharray: '5 5' },
+};
 
 interface ChatFlowProps {
   nodes: Node[];
@@ -29,7 +41,18 @@ interface ChatFlowProps {
 
 export function ChatFlow({ nodes, edges, onNodesChange, onEdgesChange, onConnect }: ChatFlowProps) {
   return (
-    <div style={{ height: '100%', width: '100%' }}>
+    <div style={{ height: '100%', width: '100%', position: 'relative' }}>
+      <div 
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'radial-gradient(circle, rgba(255,182,193,0.2) 0%, rgba(135,206,250,0.2) 100%)',
+          zIndex: 0,
+        }} 
+      />
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -37,9 +60,12 @@ export function ChatFlow({ nodes, edges, onNodesChange, onEdgesChange, onConnect
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         fitView
+        nodeTypes={nodeTypes}
+        defaultEdgeOptions={defaultEdgeOptions}
+        style={{ position: 'relative', zIndex: 1 }}
       >
         <Controls />
-        <Background />
+        <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
       </ReactFlow>
     </div>
   );
@@ -68,6 +94,7 @@ export function useFlowState() {
     const addNode = useCallback(({ id, label, x, y }: { id: string, label: string, x: number, y: number }) => {
         const newNode: Node = {
             id,
+            type: 'custom',
             position: { x, y },
             data: { label },
         };

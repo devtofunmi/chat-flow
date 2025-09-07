@@ -20,7 +20,17 @@ import { z } from "zod";
 
 export default function ChatFlowPage() {
   const [isChatOpen, setIsChatOpen] = useState(true);
-  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, addNode, addEdge, clearFlow } = useFlowState();
+  const { 
+    nodes, 
+    edges, 
+    onNodesChange, 
+    onEdgesChange, 
+    onConnect, 
+    addNode, 
+    addEdge, 
+    clearFlow,
+    recalculateLayout
+  } = useFlowState();
   const apiKey = process.env.NEXT_PUBLIC_TAMBO_API_KEY;
 
   const flowTools: TamboTool[] = [
@@ -103,7 +113,7 @@ export default function ChatFlowPage() {
                   Chat Flow
                 </h2>
                <p className="text-sm text-gray-600 mt-1">
-                 Try: "Draw a 3-step user authentication flow with connected nodes. 
+                 Try: "Draw a 5-step user authentication flow with connected nodes. 
                 Each node label = step name. Each node&apos;s data includes a payload object with &#123; description, security_risk (1-5) &#125;."
                </p>
 
@@ -143,7 +153,13 @@ export default function ChatFlowPage() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto relative">
+          <button
+            onClick={recalculateLayout}
+            className="absolute cursor-pointer top-4 right-4 z-10 bg-[#333333] hover:bg-black/80 text-white  py-2 px-3 rounded-lg"
+          >
+            Recalculate Layout
+          </button>
           <ChatFlow 
             nodes={nodes}
             edges={edges}

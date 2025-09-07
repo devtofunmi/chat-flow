@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from 'react';
-import { 
+import {
   ReactFlow,
   Controls,
   Background,
@@ -17,6 +17,48 @@ import {
 import '@xyflow/react/dist/style.css';
 import CustomNode from './CustomNode';
 import { NodeInspectorPanel } from './node-inspector-panel';
+import dagre from 'dagre';
+
+// --- Dagre layouting setup ---
+const nodeWidth = 160;
+const nodeHeight = 60;
+
+const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
+  const dagreGraph = new dagre.graphlib.Graph();
+  dagreGraph.setDefaultEdgeLabel(() => ({}));
+  const isHorizontal = direction === 'LR';
+  dagreGraph.setGraph({ rankdir: direction });
+
+  nodes.forEach((node) => {
+    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+  });
+
+  edges.forEach((edge) => {
+    dagreGraph.setEdge(edge.source, edge.target);
+  });
+
+  dagre.layout(dagreGraph);
+
+  const layoutedNodes = nodes.map((node) => {
+    const nodeWithPosition = dagreGraph.node(node.id);
+    // We are creating a new object to ensure React detects the change.
+    const updatedNode = {
+      ...node,
+      targetPosition: isHorizontal ? 'left' : 'top',
+      sourcePosition: isHorizontal ? 'right' : 'bottom',
+      position: {
+        x: nodeWithPosition.x - nodeWidth / 2,
+        y: nodeWithPosition.y - nodeHeight / 2,
+      },
+    };
+
+    return updatedNode;
+  });
+
+  return { nodes: layoutedNodes, edges };
+};
+// --- End Dagre ---
+
 
 // Initial state for the flow chart
 const initialNodes: Node[] = [];
@@ -53,7 +95,7 @@ export function ChatFlow({ nodes, edges, onNodesChange, onEdgesChange, onConnect
 
   return (
     <div style={{ height: '100%', width: '100%', position: 'relative' }}>
-      <div 
+      <div
         style={{
           position: 'absolute',
           top: 0,
@@ -62,7 +104,7 @@ export function ChatFlow({ nodes, edges, onNodesChange, onEdgesChange, onConnect
           bottom: 0,
           background: 'radial-gradient(circle, rgba(255,182,193,0.2) 0%, rgba(135,206,250,0.2) 100%)',
           zIndex: 0,
-        }} 
+        }}
       />
       <ReactFlow
         nodes={nodes}
@@ -130,5 +172,15 @@ export function useFlowState() {
         return "Successfully cleared the flow.";
     }, []);
 
-    return { nodes, edges, onNodesChange, onEdgesChange, onConnect, addNode, addEdge, clearFlow };
+    const recalculateLayout = useCallback(() => {
+        const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+            nodes,
+            edges
+        );
+
+        setNodes([...layoutedNodes]);
+        setEdges([...layoutedEdges]);
+    }, [nodes, edges]);
+
+    return { nodes, edges, onNodesChange, onEdgesChange, onConnect, addNode, addEdge, clearFlow, recalculateLayout };
 }

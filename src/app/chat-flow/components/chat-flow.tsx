@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo, forwardRef } from 'react';
 import {
   ReactFlow,
   Controls,
@@ -13,7 +13,8 @@ import {
   OnConnect,
   BackgroundVariant,
   Position,
-  MiniMap, 
+  MiniMap,
+  NodeProps,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import CustomNode, { CustomNodeProps } from './CustomNode';
@@ -67,9 +68,6 @@ const getLayoutedElements = (nodes: AppNode[], edges: Edge[], direction = 'TB') 
 const initialNodes: AppNode[] = [];
 const initialEdges: Edge[] = [];
 
-import { useMemo } from 'react';
-import { NodeProps } from '@xyflow/react';
-
 const defaultEdgeOptions = {
   animated: true,
   type: 'smoothstep',
@@ -84,8 +82,9 @@ interface ChatFlowProps {
   onConnect: OnConnect;
   onDeleteNode: (nodeId: string) => void;
   onRegenerateNode: (nodeId: string) => void;
-  updateNodeData: (nodeId: string, newData: Partial<AppNode['data']>) => void; // Add this line
-  executeApiNode: (nodeId: string) => Promise<void>; // Add this line
+  updateNodeData: (nodeId: string, newData: Partial<AppNode['data']>) => void;
+  executeApiNode: (nodeId: string) => Promise<void>;
+  setFlow: (flow: { nodes: AppNode[], edges: Edge[] }) => void;
 }
 
 interface ContextMenuState {
@@ -96,26 +95,36 @@ interface ContextMenuState {
   modalY?: number;
 }
 
+import NodeContextMenu from './NodeContextMenu';
 
-
-import NodeContextMenu from './NodeContextMenu'; 
-
-export function ChatFlow({
-  nodes,
-  edges,
-  onNodesChange,
-  onEdgesChange,
-  onConnect,
-  onDeleteNode, // Destructure new props
-  onRegenerateNode,
-  updateNodeData, // Destructure new prop
-  executeApiNode, // Destructure new prop
-}: ChatFlowProps) {
+export const ChatFlow = forwardRef<HTMLDivElement, ChatFlowProps>(function ChatFlow(
+  {
+    nodes,
+    edges,
+    onNodesChange,
+    onEdgesChange,
+    onConnect,
+    onDeleteNode,
+    onRegenerateNode,
+    updateNodeData,
+    executeApiNode,
+  },
+  ref
+) {
   const [selectedNode, setSelectedNode] = useState<AppNode | null>(null);
-  const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null); // State for context menu
-  const reactFlowWrapper = useRef<HTMLDivElement>(null);
+  const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
 
-  // Effect to update selectedNode when the nodes array changes
+  const customNodeTypes = useMemo(() => ({
+    custom: (props: NodeProps) => (
+      <CustomNode
+        {...props}
+        data={props.data as CustomNodeProps['data']}
+        onNodeUpdate={updateNodeData}
+        executeApiNode={executeApiNode}
+      />
+    ),
+  }), [updateNodeData, executeApiNode]);
+
   useEffect(() => {
     if (selectedNode) {
       const updatedSelectedNode = nodes.find(n => n.id === selectedNode.id);
@@ -134,9 +143,9 @@ export function ChatFlow({
   };
 
   const handleNodeContextMenu = (event: React.MouseEvent, node: AppNode) => {
-    event.preventDefault(); // Prevent default browser context menu
-    if (reactFlowWrapper.current) {
-      const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
+    event.preventDefault();
+    if (ref && 'current' in ref && ref.current) {
+      const reactFlowBounds = ref.current.getBoundingClientRect();
       setContextMenu({
         x: event.clientX - reactFlowBounds.left,
         y: event.clientY - reactFlowBounds.top,
@@ -163,10 +172,6 @@ export function ChatFlow({
     handleContextMenuClose();
   };
 
-  const customNodeTypes = useMemo(() => ({
-    custom: (props: NodeProps) => <CustomNode {...props as CustomNodeProps} onNodeUpdate={updateNodeData} executeApiNode={executeApiNode} />,
-  }), [updateNodeData, executeApiNode]);
-
   return (
     <div style={{ height: '100%', width: '100%', position: 'relative' }}>
       <div
@@ -187,19 +192,19 @@ export function ChatFlow({
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onNodeClick={handleNodeClick}
-        onNodeContextMenu={handleNodeContextMenu} // Add context menu handler
+        onNodeContextMenu={handleNodeContextMenu}
         nodeTypes={customNodeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
         style={{ position: 'relative', zIndex: 1 }}
-        proOptions={{ hideAttribution: true }} 
-        ref={reactFlowWrapper}
+        proOptions={{ hideAttribution: true }}
+        ref={ref}
       >
         <Controls />
         <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
-        <MiniMap /> 
+        <MiniMap />
       </ReactFlow>
       <NodeInspectorPanel node={selectedNode} onClose={handlePanelClose} onNodeUpdate={updateNodeData} />
-      {contextMenu && ( 
+      {contextMenu && (
         <NodeContextMenu
           x={contextMenu.x}
           y={contextMenu.y}
@@ -210,9 +215,8 @@ export function ChatFlow({
       )}
     </div>
   );
-}
+});
 
-// A hook to manage the state of the flow chart
 export function useFlowState() {
     const [nodes, setNodes] = useState<AppNode[]>(initialNodes);
     const [edges, setEdges] = useState<Edge[]>(initialEdges);
@@ -277,7 +281,6 @@ export function useFlowState() {
 
     const regenerateNode = useCallback((nodeId: string) => {
         console.log(`Regenerating from node: ${nodeId}. (Not yet implemented: actual AI regeneration)`);
-        // delete outgoing edges to simulate a "reset" for regeneration
         setEdges((eds) => eds.filter((edge) => edge.source !== nodeId));
     }, [setEdges]);
 
@@ -290,7 +293,6 @@ export function useFlowState() {
     }, [setNodes]);
 
     const executeApiNode = useCallback(async (nodeId: string) => {
-        // Find the node from the current state
         const nodeToExecute = nodes.find((node) => node.id === nodeId);
 
         console.log(`[executeApiNode] Checking node ${nodeId}. nodeToExecute:`, nodeToExecute);
@@ -306,7 +308,6 @@ export function useFlowState() {
             return;
         }
 
-        // Set messageType to 'success' (or 'loading') immediately
         setNodes((nds) =>
             nds.map((node) =>
                 node.id === nodeId ? { ...node, data: { ...node.data, messageType: 'success' } } : node
@@ -321,7 +322,6 @@ export function useFlowState() {
                 headers: headers || {},
             };
 
-            // Only include body for methods that allow it
             if (method !== 'GET') {
                 fetchOptions.body = body ? JSON.stringify(body) : undefined;
             }
@@ -349,7 +349,12 @@ export function useFlowState() {
             );
             console.log(`[executeApiNode] Node ${nodeId} updated with error payload:`, error);
         }
-    }, [nodes, setNodes]); // 'nodes' is now a dependency again, but it's necessary here.
+    }, [nodes, setNodes]);
+
+    const setFlow = useCallback((flow: { nodes: AppNode[], edges: Edge[] }) => {
+        setNodes(flow.nodes);
+        setEdges(flow.edges);
+    }, [setNodes, setEdges]);
 
     return { 
         nodes, 
@@ -365,5 +370,6 @@ export function useFlowState() {
         regenerateNode,
         updateNodeData, 
         executeApiNode, 
+        setFlow,
     };
 }

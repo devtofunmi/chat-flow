@@ -14,12 +14,18 @@ import {
 import { components, tools as staticTools } from "@/lib/tambo";
 import { TamboProvider, TamboTool } from "@tambo-ai/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { ChatFlow, useFlowState } from "./components/chat-flow";
 import { z } from "zod";
+import { saveAs } from "file-saver";
+import { toPng } from "html-to-image";
+
+import FeaturesModal from './components/FeaturesModal';
 
 export default function ChatFlowPage() {
   const [isChatOpen, setIsChatOpen] = useState(true);
+  const [isFeaturesModalOpen, setIsFeaturesModalOpen] = useState(false);
+
   const { 
     nodes, 
     edges, 
@@ -34,8 +40,94 @@ export default function ChatFlowPage() {
     regenerateNode,
     updateNodeData,
     executeApiNode,
+    setFlow,
   } = useFlowState();
   const apiKey = process.env.NEXT_PUBLIC_TAMBO_API_KEY;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const reactFlowWrapper = useRef<HTMLDivElement>(null);
+
+  const handleOpenFeaturesModal = () => {
+    setIsFeaturesModalOpen(true);
+  };
+
+  const handleCloseFeaturesModal = () => {
+    setIsFeaturesModalOpen(false);
+  };
+
+  const onExport = (format: 'json' | 'png') => {
+    if (format === 'json') {
+      const flow = { nodes, edges };
+      const blob = new Blob([JSON.stringify(flow, null, 2)], { type: 'application/json' });
+      saveAs(blob, 'chat-flow.json');
+    } else if (format === 'png') {
+      if (reactFlowWrapper.current) {
+        const getAllCss = () => {
+          return Array.from(document.styleSheets)
+            .map(sheet => {
+              try {
+                return Array.from(sheet.cssRules)
+                  .map(rule => rule.cssText)
+                  .join('');
+              } catch (e) {
+                console.log('Could not read stylesheet: ', sheet.href);
+                return '';
+              }
+            })
+            .join('');
+        };
+
+        const style = document.createElement('style');
+        style.innerHTML = getAllCss();
+        reactFlowWrapper.current.appendChild(style);
+
+        toPng(reactFlowWrapper.current, {
+          cacheBust: true,
+          pixelRatio: 2,
+          width: reactFlowWrapper.current.scrollWidth,
+          height: reactFlowWrapper.current.scrollHeight,
+          backgroundColor: '#F9FAFB',
+          filter: (node) => {
+            return !node.classList?.contains('react-flow__controls');
+          },
+        })
+          .then((dataUrl) => {
+            saveAs(dataUrl, 'chat-flow.png');
+          })
+          .catch((err) => {
+            console.error('oops, something went wrong!', err);
+          })
+          .finally(() => {
+            if (reactFlowWrapper.current) {
+              reactFlowWrapper.current.removeChild(style);
+            }
+          });
+      }
+    }
+  };
+
+  const onImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target?.result;
+        if (typeof content === 'string') {
+          try {
+            const flow = JSON.parse(content);
+            setFlow(flow);
+          } catch (error) {
+            console.error('Error parsing JSON file:', error);
+            alert('Error parsing JSON file.');
+          }
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
 
   const flowTools: TamboTool[] = [
     {
@@ -164,13 +256,22 @@ export default function ChatFlowPage() {
 
         {/* Main Content */}
         <div className="flex-1 overflow-auto relative">
-          <button
-            onClick={recalculateLayout}
-            className="absolute cursor-pointer top-4 right-4 z-10 hover:bg-[#333333] bg-black/90 text-white  py-2 px-3 rounded-lg"
-          >
-            Recalculate Layout
-          </button>
+          <div className="absolute top-4 right-4 z-10 flex space-x-2">
+            <button
+              onClick={recalculateLayout}
+              className="cursor-pointer hover:bg-[#333333] bg-black/90 text-white  py-2 px-3 rounded-lg"
+            >
+              Recalculate Layout
+            </button>
+            <button
+              onClick={handleOpenFeaturesModal}
+              className="cursor-pointer hover:bg-[#333333] bg-black/90 text-white  py-2 px-3 rounded-lg"
+            >
+              Features
+            </button>
+          </div>
           <ChatFlow 
+            ref={reactFlowWrapper}
             nodes={nodes}
             edges={edges}
             onNodesChange={onNodesChange}
@@ -180,9 +281,31 @@ export default function ChatFlowPage() {
             onRegenerateNode={regenerateNode}         
             updateNodeData={updateNodeData}
             executeApiNode={executeApiNode}
+            setFlow={setFlow}
+          />
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center z-10">
+            <div className="flex flex-row space-x-2 p-2 bg-white/80 backdrop-blur-sm rounded-lg shadow-md">
+                <button onClick={() => onExport('json')} title="Export JSON" className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1 text-sm">
+                    JSON
+                </button>
+                <button onClick={() => onExport('png')} title="Export PNG" className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1 text-sm">
+                    PNG
+                </button>
+                <button onClick={handleImportClick} title="Import JSON" className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1 text-sm">
+                    IMPORT
+                </button>
+            </div>
+          </div>
+          <input
+            type="file"
+            ref={fileInputRef}
+            style={{ display: 'none' }}
+            onChange={onImport}
+            accept=".json"
           />
         </div>
       </div>
+      <FeaturesModal isOpen={isFeaturesModalOpen} onClose={handleCloseFeaturesModal} />
     </TamboProvider>
   );
 }

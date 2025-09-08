@@ -21,7 +21,7 @@ import CustomNode, { CustomNodeProps } from './CustomNode';
 import { NodeInspectorPanel } from './node-inspector-panel';
 import dagre from 'dagre';
 
-export type AppNode = Node<{ label: string; messageType?: string; payload?: object; apiConfig?: { url: string; method: 'GET' | 'POST' | 'PUT' | 'DELETE'; headers?: Record<string, string>; body?: object; }; }>;
+export type AppNode = Node<{ label: string; messageType?: string; payload?: object; }>;
 
 // --- Dagre layouting setup ---
 const nodeWidth = 160;
@@ -83,7 +83,6 @@ interface ChatFlowProps {
   onDeleteNode: (nodeId: string) => void;
   onRegenerateNode: (nodeId: string) => void;
   updateNodeData: (nodeId: string, newData: Partial<AppNode['data']>) => void;
-  executeApiNode: (nodeId: string) => Promise<void>;
   setFlow: (flow: { nodes: AppNode[], edges: Edge[] }) => void;
 }
 
@@ -107,7 +106,6 @@ export const ChatFlow = forwardRef<HTMLDivElement, ChatFlowProps>(function ChatF
     onDeleteNode,
     onRegenerateNode,
     updateNodeData,
-    executeApiNode,
   },
   ref
 ) {
@@ -120,17 +118,14 @@ export const ChatFlow = forwardRef<HTMLDivElement, ChatFlowProps>(function ChatF
         {...props}
         data={props.data as CustomNodeProps['data']}
         onNodeUpdate={updateNodeData}
-        executeApiNode={executeApiNode}
       />
     ),
-  }), [updateNodeData, executeApiNode]);
+  }), [updateNodeData]);
 
   useEffect(() => {
     if (selectedNode) {
       const updatedSelectedNode = nodes.find(n => n.id === selectedNode.id);
-      if (updatedSelectedNode && updatedSelectedNode !== selectedNode) {
-        setSelectedNode(updatedSelectedNode);
-      }
+      setSelectedNode(updatedSelectedNode || null);
     }
   }, [nodes, selectedNode]);
 
@@ -286,70 +281,18 @@ export function useFlowState() {
 
     const updateNodeData = useCallback((nodeId: string, newData: Partial<AppNode['data']>) => {
         setNodes((nds) =>
-            nds.map((node) =>
-                node.id === nodeId ? { ...node, data: { ...node.data, ...newData } } : node
-            )
+            nds.map((node) => {
+                if (node.id === nodeId) {
+                    const updatedData = { ...node.data, ...newData };
+
+                    return { ...node, data: updatedData };
+                }
+                return node;
+            })
         );
     }, [setNodes]);
 
-    const executeApiNode = useCallback(async (nodeId: string) => {
-        const nodeToExecute = nodes.find((node) => node.id === nodeId);
-
-        console.log(`[executeApiNode] Checking node ${nodeId}. nodeToExecute:`, nodeToExecute);
-        console.log(`[executeApiNode] apiConfig:`, nodeToExecute?.data?.apiConfig);
-
-        if (!nodeToExecute || !nodeToExecute.data.apiConfig || !nodeToExecute.data.apiConfig.url) {
-            console.error("Node not found or missing API configuration.");
-            setNodes((nds) =>
-                nds.map((node) =>
-                    node.id === nodeId ? { ...node, data: { ...node.data, messageType: 'error', payload: { error: "Missing API configuration" } } } : node
-                )
-            );
-            return;
-        }
-
-        setNodes((nds) =>
-            nds.map((node) =>
-                node.id === nodeId ? { ...node, data: { ...node.data, messageType: 'success' } } : node
-            )
-        );
-
-        const { url, method, headers, body } = nodeToExecute.data.apiConfig;
-
-        try {
-            const fetchOptions: RequestInit = {
-                method: method || 'GET',
-                headers: headers || {},
-            };
-
-            if (method !== 'GET') {
-                fetchOptions.body = body ? JSON.stringify(body) : undefined;
-            }
-
-            const response = await fetch(url, fetchOptions);
-
-            const responseData = await response.json();
-
-            if (!response.ok) {
-                throw new Error(responseData.message || `HTTP error! status: ${response.status}`);
-            }
-
-            setNodes((nds) =>
-                nds.map((node) =>
-                    node.id === nodeId ? { ...node, data: { ...node.data, messageType: 'success', payload: responseData } } : node
-                )
-            );
-            console.log(`[executeApiNode] Node ${nodeId} updated with success payload:`, responseData);
-        } catch (error: unknown) {
-            console.error("API execution failed:", error);
-            setNodes((nds) =>
-                nds.map((node) =>
-                    node.id === nodeId ? { ...node, data: { ...node.data, messageType: 'error', payload: { error: error instanceof Error ? error.message : String(error) } } } : node
-                )
-            );
-            console.log(`[executeApiNode] Node ${nodeId} updated with error payload:`, error);
-        }
-    }, [nodes, setNodes]);
+    
 
     const setFlow = useCallback((flow: { nodes: AppNode[], edges: Edge[] }) => {
         setNodes(flow.nodes);
@@ -369,7 +312,6 @@ export function useFlowState() {
         deleteNodeAndConnectedElements,
         regenerateNode,
         updateNodeData, 
-        executeApiNode, 
         setFlow,
     };
 }

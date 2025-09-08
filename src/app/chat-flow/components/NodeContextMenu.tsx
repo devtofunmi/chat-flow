@@ -33,6 +33,12 @@ const NodeContextMenu = ({ x, y, nodeId, onClose, onAction }: NodeContextMenuPro
       style={{ top: y, left: x }}
     >
       <button
+        className="absolute top-1 right-1 text-gray-500 hover:text-gray-700"
+        onClick={onClose}
+      >
+        &times;
+      </button>
+      <button
         className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
         onClick={() => handleAction('regenerate')}
       >

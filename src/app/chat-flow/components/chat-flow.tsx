@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import {
   ReactFlow,
   Controls,
@@ -113,6 +113,7 @@ export function ChatFlow({
 }: ChatFlowProps) {
   const [selectedNode, setSelectedNode] = useState<AppNode | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null); // State for context menu
+  const reactFlowWrapper = useRef<HTMLDivElement>(null);
 
   const handleNodeClick = (_: React.MouseEvent, node: AppNode) => {
     setSelectedNode(node);
@@ -124,14 +125,14 @@ export function ChatFlow({
 
   const handleNodeContextMenu = (event: React.MouseEvent, node: AppNode) => {
     event.preventDefault(); // Prevent default browser context menu
-    // Position the context menu next to the node
-    setContextMenu({ 
-      x: node.position.x + nodeWidth, // Position to the right of the node
-      y: node.position.y + 10, // Slightly below the node's top edge
-      nodeId: node.id, 
-      modalX: node.position.x + nodeWidth + 10, // Not used anymore, but keeping for now
-      modalY: node.position.y + 10 // Not used anymore, but keeping for now
-    });
+    if (reactFlowWrapper.current) {
+      const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
+      setContextMenu({
+        x: event.clientX - reactFlowBounds.left,
+        y: event.clientY - reactFlowBounds.top,
+        nodeId: node.id,
+      });
+    }
   };
 
   const handleContextMenuClose = () => {
@@ -181,6 +182,7 @@ export function ChatFlow({
         defaultEdgeOptions={defaultEdgeOptions}
         style={{ position: 'relative', zIndex: 1 }}
         proOptions={{ hideAttribution: true }} 
+        ref={reactFlowWrapper}
       >
         <Controls />
         <Background variant={BackgroundVariant.Dots} gap={12} size={1} />

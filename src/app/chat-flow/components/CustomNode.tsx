@@ -1,22 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Handle, Position, NodeProps, Node, useUpdateNodeInternals } from "@xyflow/react";
-import { ChevronDown, ChevronUp, Play, Loader2 } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 export interface CustomNodeProps extends NodeProps {
   data: {
     label: string;
     messageType?: string;
     payload?: object;
-    apiConfig?: {
-      url: string;
-      method: 'GET' | 'POST' | 'PUT' | 'DELETE';
-      headers?: Record<string, string>;
-      body?: object;
-    };
     isExpanded?: boolean;
   };
   onNodeUpdate: (nodeId: string, newData: Partial<Node['data']>) => void;
-  executeApiNode: (nodeId: string) => Promise<void>;
 }
 
 const nodeStyles: { [key: string]: React.CSSProperties } = {
@@ -42,10 +35,9 @@ const nodeStyles: { [key: string]: React.CSSProperties } = {
   },
 };
 
-const CustomNode = ({ data, id, onNodeUpdate, executeApiNode }: CustomNodeProps) => {
+const CustomNode = ({ data, id, onNodeUpdate }: CustomNodeProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [label, setLabel] = useState(data.label);
-  const [isLoading, setIsLoading] = useState(false);
   const style = nodeStyles[data.messageType || "default"];
   const updateNodeInternals = useUpdateNodeInternals();
 
@@ -86,12 +78,7 @@ const CustomNode = ({ data, id, onNodeUpdate, executeApiNode }: CustomNodeProps)
     }
   };
 
-  const handleExecuteApi = async (event: React.MouseEvent) => {
-    event.stopPropagation();
-    setIsLoading(true);
-    await executeApiNode(id);
-    setIsLoading(false);
-  };
+  
 
   return (
     <div
@@ -129,16 +116,7 @@ const CustomNode = ({ data, id, onNodeUpdate, executeApiNode }: CustomNodeProps)
         </button>
       )}
 
-      {data.apiConfig && (
-        <button
-          onClick={handleExecuteApi}
-          className="absolute top-1 left-1 p-1 rounded-full hover:bg-gray-200"
-          title="Execute API Call"
-          disabled={isLoading}
-        >
-          {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} />}
-        </button>
-      )}
+      
 
       {isExpanded && data.payload && (
         <div className="mt-2 text-xs text-gray-700 text-left w-full overflow-auto">

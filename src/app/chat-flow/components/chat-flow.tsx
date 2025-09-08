@@ -119,14 +119,13 @@ export function ChatFlow({
 
   const handleNodeContextMenu = (event: React.MouseEvent, node: Node) => {
     event.preventDefault(); // Prevent default browser context menu
-    // Position the context menu at the click coordinates
-    // Position the modal next to the context menu, with an offset
+    // Position the context menu next to the node
     setContextMenu({ 
-      x: event.clientX, 
-      y: event.clientY, 
+      x: node.position.x + nodeWidth, // Position to the right of the node
+      y: node.position.y + 10, // Slightly below the node's top edge
       nodeId: node.id, 
-      modalX: event.clientX + 160, // Offset by 160px to the right of the click
-      modalY: event.clientY // Align vertically with the click
+      modalX: node.position.x + nodeWidth + 10, // Not used anymore, but keeping for now
+      modalY: node.position.y + 10 // Not used anymore, but keeping for now
     });
   };
 

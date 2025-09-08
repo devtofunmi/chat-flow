@@ -1,5 +1,4 @@
-
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import {
   ReactFlow,
   Controls,
@@ -21,7 +20,7 @@ import CustomNode, { CustomNodeProps } from './CustomNode';
 import { NodeInspectorPanel } from './node-inspector-panel';
 import dagre from 'dagre';
 
-export type AppNode = Node<{ label: string; messageType?: string; payload?: object }>;
+export type AppNode = Node<{ label: string; messageType?: string; payload?: object; apiConfig?: { url: string; method: 'GET' | 'POST' | 'PUT' | 'DELETE'; headers?: Record<string, string>; body?: object; }; }>;
 
 // --- Dagre layouting setup ---
 const nodeWidth = 160;
@@ -83,10 +82,10 @@ interface ChatFlowProps {
   onNodesChange: OnNodesChange;
   onEdgesChange: OnEdgesChange;
   onConnect: OnConnect;
-  // New props for context menu actions
   onDeleteNode: (nodeId: string) => void;
   onRegenerateNode: (nodeId: string) => void;
   updateNodeData: (nodeId: string, newData: Partial<AppNode['data']>) => void; // Add this line
+  executeApiNode: (nodeId: string) => Promise<void>; // Add this line
 }
 
 interface ContextMenuState {
@@ -99,7 +98,7 @@ interface ContextMenuState {
 
 
 
-import NodeContextMenu from './NodeContextMenu'; // Import NodeContextMenu
+import NodeContextMenu from './NodeContextMenu'; 
 
 export function ChatFlow({
   nodes,
@@ -110,10 +109,21 @@ export function ChatFlow({
   onDeleteNode, // Destructure new props
   onRegenerateNode,
   updateNodeData, // Destructure new prop
+  executeApiNode, // Destructure new prop
 }: ChatFlowProps) {
   const [selectedNode, setSelectedNode] = useState<AppNode | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null); // State for context menu
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
+
+  // Effect to update selectedNode when the nodes array changes
+  useEffect(() => {
+    if (selectedNode) {
+      const updatedSelectedNode = nodes.find(n => n.id === selectedNode.id);
+      if (updatedSelectedNode && updatedSelectedNode !== selectedNode) {
+        setSelectedNode(updatedSelectedNode);
+      }
+    }
+  }, [nodes, selectedNode]);
 
   const handleNodeClick = (_: React.MouseEvent, node: AppNode) => {
     setSelectedNode(node);
@@ -154,8 +164,8 @@ export function ChatFlow({
   };
 
   const customNodeTypes = useMemo(() => ({
-    custom: (props: NodeProps) => <CustomNode {...props as CustomNodeProps} onNodeUpdate={updateNodeData} />,
-  }), [updateNodeData]);
+    custom: (props: NodeProps) => <CustomNode {...props as CustomNodeProps} onNodeUpdate={updateNodeData} executeApiNode={executeApiNode} />,
+  }), [updateNodeData, executeApiNode]);
 
   return (
     <div style={{ height: '100%', width: '100%', position: 'relative' }}>
@@ -189,7 +199,7 @@ export function ChatFlow({
         <MiniMap /> 
       </ReactFlow>
       <NodeInspectorPanel node={selectedNode} onClose={handlePanelClose} onNodeUpdate={updateNodeData} />
-      {contextMenu && ( // Conditionally render context menu
+      {contextMenu && ( 
         <NodeContextMenu
           x={contextMenu.x}
           y={contextMenu.y}
@@ -267,7 +277,7 @@ export function useFlowState() {
 
     const regenerateNode = useCallback((nodeId: string) => {
         console.log(`Regenerating from node: ${nodeId}. (Not yet implemented: actual AI regeneration)`);
-        // For now, just delete outgoing edges to simulate a "reset" for regeneration
+        // delete outgoing edges to simulate a "reset" for regeneration
         setEdges((eds) => eds.filter((edge) => edge.source !== nodeId));
     }, [setEdges]);
 
@@ -279,6 +289,68 @@ export function useFlowState() {
         );
     }, [setNodes]);
 
+    const executeApiNode = useCallback(async (nodeId: string) => {
+        // Find the node from the current state
+        const nodeToExecute = nodes.find((node) => node.id === nodeId);
+
+        console.log(`[executeApiNode] Checking node ${nodeId}. nodeToExecute:`, nodeToExecute);
+        console.log(`[executeApiNode] apiConfig:`, nodeToExecute?.data?.apiConfig);
+
+        if (!nodeToExecute || !nodeToExecute.data.apiConfig || !nodeToExecute.data.apiConfig.url) {
+            console.error("Node not found or missing API configuration.");
+            setNodes((nds) =>
+                nds.map((node) =>
+                    node.id === nodeId ? { ...node, data: { ...node.data, messageType: 'error', payload: { error: "Missing API configuration" } } } : node
+                )
+            );
+            return;
+        }
+
+        // Set messageType to 'success' (or 'loading') immediately
+        setNodes((nds) =>
+            nds.map((node) =>
+                node.id === nodeId ? { ...node, data: { ...node.data, messageType: 'success' } } : node
+            )
+        );
+
+        const { url, method, headers, body } = nodeToExecute.data.apiConfig;
+
+        try {
+            const fetchOptions: RequestInit = {
+                method: method || 'GET',
+                headers: headers || {},
+            };
+
+            // Only include body for methods that allow it
+            if (method !== 'GET') {
+                fetchOptions.body = body ? JSON.stringify(body) : undefined;
+            }
+
+            const response = await fetch(url, fetchOptions);
+
+            const responseData = await response.json();
+
+            if (!response.ok) {
+                throw new Error(responseData.message || `HTTP error! status: ${response.status}`);
+            }
+
+            setNodes((nds) =>
+                nds.map((node) =>
+                    node.id === nodeId ? { ...node, data: { ...node.data, messageType: 'success', payload: responseData } } : node
+                )
+            );
+            console.log(`[executeApiNode] Node ${nodeId} updated with success payload:`, responseData);
+        } catch (error: unknown) {
+            console.error("API execution failed:", error);
+            setNodes((nds) =>
+                nds.map((node) =>
+                    node.id === nodeId ? { ...node, data: { ...node.data, messageType: 'error', payload: { error: error instanceof Error ? error.message : String(error) } } } : node
+                )
+            );
+            console.log(`[executeApiNode] Node ${nodeId} updated with error payload:`, error);
+        }
+    }, [nodes, setNodes]); // 'nodes' is now a dependency again, but it's necessary here.
+
     return { 
         nodes, 
         edges, 
@@ -289,8 +361,9 @@ export function useFlowState() {
         addEdge, 
         clearFlow, 
         recalculateLayout,
-        deleteNodeAndConnectedElements, // Expose new function
-        regenerateNode,               // Expose new function
-        updateNodeData, // Expose new function
+        deleteNodeAndConnectedElements,
+        regenerateNode,
+        updateNodeData, 
+        executeApiNode, 
     };
 }

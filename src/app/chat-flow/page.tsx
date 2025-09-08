@@ -33,6 +33,7 @@ export default function ChatFlowPage() {
     deleteNodeAndConnectedElements,
     regenerateNode,
     updateNodeData,
+    executeApiNode,
   } = useFlowState();
   const apiKey = process.env.NEXT_PUBLIC_TAMBO_API_KEY;
 
@@ -46,7 +47,7 @@ export default function ChatFlowPage() {
           id: z.string().describe("A unique identifier for the node."),
           data: z.object({
             label: z.string().describe("The text to display on the node."),
-            messageType: z.string().optional().describe("The type of message (e.g., 'user', 'ai', 'tool', 'error')."),
+            messageType: z.string().optional().describe("The type of message (e.g., 'user', 'ai', 'success', 'error')."),
             payload: z.any().optional().describe("The detailed payload for the node."),
           }).describe("The data payload for the node."),
           x: z.number().describe("The x-coordinate for the node's position."),
@@ -122,7 +123,7 @@ export default function ChatFlowPage() {
                 </h2>
                <p className="text-sm text-gray-600 mt-1">
                  Try: &quot;Draw a 7-step network troubleshooting flow. Connect nodes sequentially. Each node&apos;s `label` = step name. `data` includes `payload` with `description`.
-                  Assign `messageType` for each step: &apos;user&apos; (steps 1, 6), &apos;ai&apos; (steps 2, 5), &apos;tool&apos; (step 3), &apos;error&apos; (step 4), &apos;default&apos; (step 7).&quot;
+                  Assign `messageType` for each step: &apos;user&apos; (steps 1, 6), &apos;ai&apos; (steps 2, 5), &apos;success&apos; (step 3), &apos;error&apos; (step 4), &apos;default&apos; (step 7).&quot;
                </p>
 
 
@@ -175,9 +176,10 @@ export default function ChatFlowPage() {
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
-            onDeleteNode={deleteNodeAndConnectedElements} // Pass new function
-            onRegenerateNode={regenerateNode}           // Pass new function
+            onDeleteNode={deleteNodeAndConnectedElements} 
+            onRegenerateNode={regenerateNode}         
             updateNodeData={updateNodeData}
+            executeApiNode={executeApiNode}
           />
         </div>
       </div>

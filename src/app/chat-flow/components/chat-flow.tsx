@@ -82,10 +82,32 @@ interface ChatFlowProps {
   onNodesChange: OnNodesChange;
   onEdgesChange: OnEdgesChange;
   onConnect: OnConnect;
+  // New props for context menu actions
+  onDeleteNode: (nodeId: string) => void;
+  onRegenerateNode: (nodeId: string) => void;
 }
 
-export function ChatFlow({ nodes, edges, onNodesChange, onEdgesChange, onConnect }: ChatFlowProps) {
+interface ContextMenuState {
+  x: number;
+  y: number;
+  nodeId: string;
+  modalX?: number;
+  modalY?: number;
+}
+
+import NodeContextMenu from './NodeContextMenu'; // Import NodeContextMenu
+
+export function ChatFlow({
+  nodes,
+  edges,
+  onNodesChange,
+  onEdgesChange,
+  onConnect,
+  onDeleteNode, // Destructure new props
+  onRegenerateNode,
+}: ChatFlowProps) {
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null); // State for context menu
 
   const handleNodeClick = (_: React.MouseEvent, node: Node) => {
     setSelectedNode(node);
@@ -93,6 +115,37 @@ export function ChatFlow({ nodes, edges, onNodesChange, onEdgesChange, onConnect
 
   const handlePanelClose = () => {
     setSelectedNode(null);
+  };
+
+  const handleNodeContextMenu = (event: React.MouseEvent, node: Node) => {
+    event.preventDefault(); // Prevent default browser context menu
+    // Position the context menu at the click coordinates
+    // Position the modal next to the context menu, with an offset
+    setContextMenu({ 
+      x: event.clientX, 
+      y: event.clientY, 
+      nodeId: node.id, 
+      modalX: event.clientX + 160, // Offset by 160px to the right of the click
+      modalY: event.clientY // Align vertically with the click
+    });
+  };
+
+  const handleContextMenuClose = () => {
+    setContextMenu(null);
+  };
+
+  const handleContextMenuItemClick = (action: string, nodeId: string) => {
+    switch (action) {
+      case 'regenerate':
+        onRegenerateNode(nodeId);
+        break;
+      case 'delete':
+        onDeleteNode(nodeId);
+        break;
+      default:
+        console.warn(`Unknown action: ${action}`);
+    }
+    handleContextMenuClose();
   };
 
   return (
@@ -115,6 +168,7 @@ export function ChatFlow({ nodes, edges, onNodesChange, onEdgesChange, onConnect
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onNodeClick={handleNodeClick}
+        onNodeContextMenu={handleNodeContextMenu} // Add context menu handler
         nodeTypes={nodeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
         style={{ position: 'relative', zIndex: 1 }}
@@ -125,6 +179,15 @@ export function ChatFlow({ nodes, edges, onNodesChange, onEdgesChange, onConnect
         <MiniMap /> 
       </ReactFlow>
       <NodeInspectorPanel node={selectedNode} onClose={handlePanelClose} />
+      {contextMenu && ( // Conditionally render context menu
+        <NodeContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          nodeId={contextMenu.nodeId}
+          onClose={handleContextMenuClose}
+          onAction={handleContextMenuItemClick}
+        />
+      )}
     </div>
   );
 }
@@ -186,5 +249,29 @@ export function useFlowState() {
         setEdges([...layoutedEdges]);
     }, [nodes, edges]);
 
-    return { nodes, edges, onNodesChange, onEdgesChange, onConnect, addNode, addEdge, clearFlow, recalculateLayout };
+    const deleteNodeAndConnectedElements = useCallback((nodeId: string) => {
+        setNodes((nds) => nds.filter((node) => node.id !== nodeId));
+        setEdges((eds) => eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId));
+        console.log(`Deleted node ${nodeId} and its connected edges.`);
+    }, [setNodes, setEdges]);
+
+    const regenerateNode = useCallback((nodeId: string) => {
+        console.log(`Regenerating from node: ${nodeId}. (Not yet implemented: actual AI regeneration)`);
+        // For now, just delete outgoing edges to simulate a "reset" for regeneration
+        setEdges((eds) => eds.filter((edge) => edge.source !== nodeId));
+    }, [setEdges]);
+
+    return { 
+        nodes, 
+        edges, 
+        onNodesChange, 
+        onEdgesChange, 
+        onConnect, 
+        addNode, 
+        addEdge, 
+        clearFlow, 
+        recalculateLayout,
+        deleteNodeAndConnectedElements, // Expose new function
+        regenerateNode,               // Expose new function
+    };
 }

@@ -29,7 +29,9 @@ export default function ChatFlowPage() {
     addNode, 
     addEdge, 
     clearFlow,
-    recalculateLayout
+    recalculateLayout,
+    deleteNodeAndConnectedElements,
+    regenerateNode,            
   } = useFlowState();
   const apiKey = process.env.NEXT_PUBLIC_TAMBO_API_KEY;
 
@@ -41,7 +43,7 @@ export default function ChatFlowPage() {
       toolSchema: z.function().args(
         z.object({
           id: z.string().describe("A unique identifier for the node."),
-          data: z.object({ // Changed z.any() to z.object()
+          data: z.object({
             label: z.string().describe("The text to display on the node."),
             messageType: z.string().optional().describe("The type of message (e.g., 'user', 'ai', 'tool', 'error')."),
             payload: z.any().optional().describe("The detailed payload for the node."),
@@ -103,6 +105,7 @@ export default function ChatFlowPage() {
       tools={allTools}
       tamboUrl={process.env.NEXT_PUBLIC_TAMBO_URL}
     >
+
       <div className="flex h-screen bg-gray-50">
         {/* Chat Sidebar */}
         <div
@@ -118,7 +121,7 @@ export default function ChatFlowPage() {
                 </h2>
                <p className="text-sm text-gray-600 mt-1">
                  Try: &quot;Draw a 7-step network troubleshooting flow. Connect nodes sequentially. Each node&apos;s `label` = step name. `data` includes `payload` with `description`.
-                  Assign `messageType` for each step: 'user' (steps 1, 6), 'ai' (steps 2, 5), 'tool' (step 3), 'error' (step 4), 'default' (step 7).&quot;
+                  Assign `messageType` for each step: &apos;user&apos; (steps 1, 6), &apos;ai&apos; (steps 2, 5), &apos;tool&apos; (step 3), &apos;error&apos; (step 4), &apos;default&apos; (step 7).&quot;
                </p>
 
 
@@ -171,6 +174,8 @@ export default function ChatFlowPage() {
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
+            onDeleteNode={deleteNodeAndConnectedElements} // Pass new function
+            onRegenerateNode={regenerateNode}           // Pass new function
           />
         </div>
       </div>

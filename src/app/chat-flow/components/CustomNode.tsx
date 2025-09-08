@@ -3,7 +3,7 @@ import { Handle, Position } from "@xyflow/react";
 import { ChevronDown, ChevronUp } from "lucide-react"; 
 
 interface CustomNodeProps {
-  data: { label: string; messageType?: string; payload?: any }; // Add payload to data interface
+  data: { label: string; messageType?: string; payload?: object }; // Add payload to data interface
 }
 
 const nodeStyles: { [key: string]: React.CSSProperties } = {

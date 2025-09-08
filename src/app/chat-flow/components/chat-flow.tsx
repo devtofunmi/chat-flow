@@ -17,15 +17,17 @@ import {
   MiniMap, 
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import CustomNode from './CustomNode';
+import CustomNode, { CustomNodeProps } from './CustomNode';
 import { NodeInspectorPanel } from './node-inspector-panel';
 import dagre from 'dagre';
+
+export type AppNode = Node<{ label: string; messageType?: string; payload?: object }>;
 
 // --- Dagre layouting setup ---
 const nodeWidth = 160;
 const nodeHeight = 60;
 
-const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
+const getLayoutedElements = (nodes: AppNode[], edges: Edge[], direction = 'TB') => {
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
   const isHorizontal = direction === 'LR';
@@ -44,7 +46,7 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'TB') => 
   const layoutedNodes = nodes.map((node) => {
     const nodeWithPosition = dagreGraph.node(node.id);
     // We are creating a new object to ensure React detects the change.
-    const updatedNode: Node = {
+    const updatedNode: AppNode = {
       ...node,
       targetPosition: isHorizontal ? Position.Left : Position.Top,
       sourcePosition: isHorizontal ? Position.Right : Position.Bottom,
@@ -63,12 +65,11 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'TB') => 
 
 
 // Initial state for the flow chart
-const initialNodes: Node[] = [];
+const initialNodes: AppNode[] = [];
 const initialEdges: Edge[] = [];
 
-const nodeTypes = {
-  custom: CustomNode,
-};
+import { useMemo } from 'react';
+import { NodeProps } from '@xyflow/react';
 
 const defaultEdgeOptions = {
   animated: true,
@@ -77,7 +78,7 @@ const defaultEdgeOptions = {
 };
 
 interface ChatFlowProps {
-  nodes: Node[];
+  nodes: AppNode[];
   edges: Edge[];
   onNodesChange: OnNodesChange;
   onEdgesChange: OnEdgesChange;
@@ -85,6 +86,7 @@ interface ChatFlowProps {
   // New props for context menu actions
   onDeleteNode: (nodeId: string) => void;
   onRegenerateNode: (nodeId: string) => void;
+  updateNodeData: (nodeId: string, newData: Partial<AppNode['data']>) => void; // Add this line
 }
 
 interface ContextMenuState {
@@ -94,6 +96,8 @@ interface ContextMenuState {
   modalX?: number;
   modalY?: number;
 }
+
+
 
 import NodeContextMenu from './NodeContextMenu'; // Import NodeContextMenu
 
@@ -105,11 +109,12 @@ export function ChatFlow({
   onConnect,
   onDeleteNode, // Destructure new props
   onRegenerateNode,
+  updateNodeData, // Destructure new prop
 }: ChatFlowProps) {
-  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [selectedNode, setSelectedNode] = useState<AppNode | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null); // State for context menu
 
-  const handleNodeClick = (_: React.MouseEvent, node: Node) => {
+  const handleNodeClick = (_: React.MouseEvent, node: AppNode) => {
     setSelectedNode(node);
   };
 
@@ -117,7 +122,7 @@ export function ChatFlow({
     setSelectedNode(null);
   };
 
-  const handleNodeContextMenu = (event: React.MouseEvent, node: Node) => {
+  const handleNodeContextMenu = (event: React.MouseEvent, node: AppNode) => {
     event.preventDefault(); // Prevent default browser context menu
     // Position the context menu next to the node
     setContextMenu({ 
@@ -147,6 +152,10 @@ export function ChatFlow({
     handleContextMenuClose();
   };
 
+  const customNodeTypes = useMemo(() => ({
+    custom: (props: NodeProps) => <CustomNode {...props as CustomNodeProps} onNodeUpdate={updateNodeData} />,
+  }), [updateNodeData]);
+
   return (
     <div style={{ height: '100%', width: '100%', position: 'relative' }}>
       <div
@@ -168,7 +177,7 @@ export function ChatFlow({
         onConnect={onConnect}
         onNodeClick={handleNodeClick}
         onNodeContextMenu={handleNodeContextMenu} // Add context menu handler
-        nodeTypes={nodeTypes}
+        nodeTypes={customNodeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
         style={{ position: 'relative', zIndex: 1 }}
         proOptions={{ hideAttribution: true }} 
@@ -177,7 +186,7 @@ export function ChatFlow({
         <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
         <MiniMap /> 
       </ReactFlow>
-      <NodeInspectorPanel node={selectedNode} onClose={handlePanelClose} />
+      <NodeInspectorPanel node={selectedNode} onClose={handlePanelClose} onNodeUpdate={updateNodeData} />
       {contextMenu && ( // Conditionally render context menu
         <NodeContextMenu
           x={contextMenu.x}
@@ -193,11 +202,11 @@ export function ChatFlow({
 
 // A hook to manage the state of the flow chart
 export function useFlowState() {
-    const [nodes, setNodes] = useState<Node[]>(initialNodes);
+    const [nodes, setNodes] = useState<AppNode[]>(initialNodes);
     const [edges, setEdges] = useState<Edge[]>(initialEdges);
 
     const onNodesChange: OnNodesChange = useCallback(
-        (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
+        (changes) => setNodes((nds) => applyNodeChanges(changes, nds) as AppNode[]),
         [setNodes]
     );
 
@@ -212,7 +221,7 @@ export function useFlowState() {
     );
 
     const addNode = useCallback(({ id, data, x, y }: { id: string, data: { label: string; messageType?: string }, x: number, y: number }) => {
-        const newNode: Node = {
+        const newNode: AppNode = {
             id,
             type: 'custom',
             position: { x, y },
@@ -260,6 +269,14 @@ export function useFlowState() {
         setEdges((eds) => eds.filter((edge) => edge.source !== nodeId));
     }, [setEdges]);
 
+    const updateNodeData = useCallback((nodeId: string, newData: Partial<AppNode['data']>) => {
+        setNodes((nds) =>
+            nds.map((node) =>
+                node.id === nodeId ? { ...node, data: { ...node.data, ...newData } } : node
+            )
+        );
+    }, [setNodes]);
+
     return { 
         nodes, 
         edges, 
@@ -272,5 +289,6 @@ export function useFlowState() {
         recalculateLayout,
         deleteNodeAndConnectedElements, // Expose new function
         regenerateNode,               // Expose new function
+        updateNodeData, // Expose new function
     };
 }

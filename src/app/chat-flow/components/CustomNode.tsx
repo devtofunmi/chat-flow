@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { Handle, Position } from "@xyflow/react";
+import { Handle, Position, NodeProps, Node } from "@xyflow/react";
 import { ChevronDown, ChevronUp } from "lucide-react"; 
 
-interface CustomNodeProps {
-  data: { label: string; messageType?: string; payload?: object }; // Add payload to data interface
+export interface CustomNodeProps extends NodeProps {
+  data: { label: string; messageType?: string; payload?: object }; // Override data from NodeProps
+  onNodeUpdate: (nodeId: string, newData: Partial<Node['data']>) => void; // Add onNodeUpdate
 }
 
 const nodeStyles: { [key: string]: React.CSSProperties } = {
@@ -29,13 +30,39 @@ const nodeStyles: { [key: string]: React.CSSProperties } = {
   },
 };
 
-const CustomNode = ({ data }: CustomNodeProps) => {
+const CustomNode = ({ data, id, onNodeUpdate }: CustomNodeProps) => {
   const [isExpanded, setIsExpanded] = useState(false); // State for expand/collapse
+  const [isEditing, setIsEditing] = useState(false); // State for in-place editing
+  const [label, setLabel] = useState(data.label); // Local state for editable label
   const style = nodeStyles[data.messageType || "default"];
 
   const toggleExpand = (event: React.MouseEvent) => {
     event.stopPropagation(); // Prevent React Flow from moving the node
     setIsExpanded(!isExpanded);
+  };
+
+  const handleDoubleClick = () => {
+    setIsEditing(true);
+  };
+
+  const handleLabelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setLabel(event.target.value);
+  };
+
+  const handleBlur = () => {
+    setIsEditing(false);
+    if (label !== data.label) {
+      onNodeUpdate(id, { label: label }); // Call the prop function to update the node data
+    }
+  };
+
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      setIsEditing(false);
+      if (label !== data.label) {
+        onNodeUpdate(id, { label: label });
+      }
+    }
   };
 
   return (
@@ -47,9 +74,22 @@ const CustomNode = ({ data }: CustomNodeProps) => {
         height: isExpanded ? "auto" : "60px", 
         ...style,
       }}
+      onDoubleClick={handleDoubleClick} // Add double-click handler
     >
-
-      <div className="!text-gray-800 text-sm flex items-center justify-center flex-1">{data.label}</div>
+      {isEditing ? (
+        <input
+          type="text"
+          value={label}
+          onChange={handleLabelChange}
+          onBlur={handleBlur}
+          onKeyPress={handleKeyPress}
+          className="nodrag text-center w-full bg-transparent border-b border-gray-400 focus:outline-none"
+          autoFocus
+        />
+      ) : (
+        <div className="!text-gray-800 text-sm flex items-center justify-center flex-1">{data.label}</div>
+      )}
+      
       {data.payload && ( // Only show button if there's a payload
         <button
           onClick={toggleExpand}

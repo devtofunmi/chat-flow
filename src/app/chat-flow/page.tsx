@@ -31,7 +31,8 @@ export default function ChatFlowPage() {
     clearFlow,
     recalculateLayout,
     deleteNodeAndConnectedElements,
-    regenerateNode,            
+    regenerateNode,
+    updateNodeData,
   } = useFlowState();
   const apiKey = process.env.NEXT_PUBLIC_TAMBO_API_KEY;
 
@@ -176,6 +177,7 @@ export default function ChatFlowPage() {
             onConnect={onConnect}
             onDeleteNode={deleteNodeAndConnectedElements} // Pass new function
             onRegenerateNode={regenerateNode}           // Pass new function
+            updateNodeData={updateNodeData}
           />
         </div>
       </div>

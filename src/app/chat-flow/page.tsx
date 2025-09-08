@@ -39,7 +39,6 @@ export default function ChatFlowPage() {
     deleteNodeAndConnectedElements,
     regenerateNode,
     updateNodeData,
-    executeApiNode,
     setFlow,
   } = useFlowState();
   const apiKey = process.env.NEXT_PUBLIC_TAMBO_API_KEY;
@@ -109,8 +108,8 @@ export default function ChatFlowPage() {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
-        const content = e.target?.result;
+      reader.onload = (_e) => {
+        const content = _e.target?.result;
         if (typeof content === 'string') {
           try {
             const flow = JSON.parse(content);
@@ -279,8 +278,7 @@ export default function ChatFlowPage() {
             onConnect={onConnect}
             onDeleteNode={deleteNodeAndConnectedElements} 
             onRegenerateNode={regenerateNode}         
-            updateNodeData={updateNodeData}
-            executeApiNode={executeApiNode}
+                        updateNodeData={updateNodeData}
             setFlow={setFlow}
           />
           <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center z-10">

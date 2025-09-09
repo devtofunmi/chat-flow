@@ -23,7 +23,7 @@ import { toPng } from "html-to-image";
 import FeaturesModal from './components/FeaturesModal';
 
 export default function ChatFlowPage() {
-  const [isChatOpen, setIsChatOpen] = useState(true);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const [isFeaturesModalOpen, setIsFeaturesModalOpen] = useState(false);
 
   const { 
@@ -202,6 +202,8 @@ export default function ChatFlowPage() {
       <div className="flex h-screen bg-gray-50">
         {/* Chat Sidebar */}
         <div
+          onMouseEnter={() => setIsChatOpen(true)}
+          // onMouseLeave={() => setIsChatOpen(false)}
           className={`${
             isChatOpen ? "w-96" : "w-16"
           } border-r border-gray-200 bg-white transition-all duration-300 flex flex-col relative`}

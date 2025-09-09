@@ -7,7 +7,7 @@ export interface CustomNodeProps extends NodeProps {
     label: string;
     messageType?: string;
     isExpanded?: boolean;
-    description?: string; // Added description field
+    description?: string;
   };
   onNodeUpdate: (nodeId: string, newData: Partial<Node['data']>) => void;
 }
@@ -113,14 +113,14 @@ const CustomNode = ({ data, id, onNodeUpdate }: CustomNodeProps) => {
         />
       ) : (
         <>
-          <div className="!text-gray-800 text-sm flex items-center justify-center flex-1 "> {/* Added relative positioning */}
+          <div className="!text-gray-800 text-sm flex items-center justify-center flex-1 "> 
             {data.label}
-            <button onClick={toggleExpand} className="absolute right-2 top-1 rounded-full hover:bg-gray-200"> {/* Absolute positioning */}
+            <button onClick={toggleExpand} className="absolute right-2 top-1 rounded-full hover:bg-gray-200"> 
               {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </button>
           </div>
           {isExpanded && (
-            <div> {/* This div will wrap both description and dropdown */}
+            <div> 
               <div className="w-full mt-2">
                 <h4 className="text-xs font-semibold text-gray-600">Description:</h4>
                 <textarea
@@ -128,7 +128,7 @@ const CustomNode = ({ data, id, onNodeUpdate }: CustomNodeProps) => {
                   onChange={handleDescriptionChange}
                   className="nodrag mt-1 block w-full p-1 text-xs rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 font-mono overflow-hidden"
                   rows={4}
-                  readOnly // Added readOnly attribute
+                  readOnly
                 />
               </div>
              

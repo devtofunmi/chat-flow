@@ -45,7 +45,7 @@ const getLayoutedElements = (nodes: AppNode[], edges: Edge[], direction = 'TB') 
 
   const layoutedNodes = nodes.map((node) => {
     const nodeWithPosition = dagreGraph.node(node.id);
-    // We are creating a new object to ensure React detects the change.
+    // reating a new object to ensure React detects the change.
     const updatedNode: AppNode = {
       ...node,
       targetPosition: isHorizontal ? Position.Left : Position.Top,
@@ -61,7 +61,7 @@ const getLayoutedElements = (nodes: AppNode[], edges: Edge[], direction = 'TB') 
 
   return { nodes: layoutedNodes, edges };
 };
-// --- End Dagre ---
+// End Dagre
 
 
 // Initial state for the flow chart

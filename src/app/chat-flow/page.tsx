@@ -13,7 +13,7 @@ import {
 } from "@/components/tambo/thread-content";
 import { components, tools as staticTools } from "@/lib/tambo";
 import { TamboProvider, TamboTool } from "@tambo-ai/react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronRight, Menu, MessageSquare } from "lucide-react";
 import { useState, useRef } from "react";
 import { ChatFlow, useFlowState } from "./components/chat-flow";
 import { z } from "zod";
@@ -203,18 +203,17 @@ export default function ChatFlowPage() {
         {/* Chat Sidebar */}
         <div
           className={`${
-            isChatOpen ? "w-96" : "w-0"
+            isChatOpen ? "w-96" : "w-16"
           } border-r border-gray-200 bg-white transition-all duration-300 flex flex-col relative`}
         >
           {isChatOpen && (
             <>
-              <div className="p-4 border-b border-gray-200">
+              <div className="p-4 mt-12 border-b border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900">
                   Chat Flow
                 </h2>
                <p className="text-sm text-gray-600 mt-1">
-                 Try: &quot;Draw a 7-step network troubleshooting flow. Connect nodes sequentially. Each node&apos;s `label` = step name. `data` includes `payload` with `description`.
-                  Assign `messageType` for each step: &apos;user&apos; (steps 1, 6), &apos;ai&apos; (steps 2, 5), &apos;success&apos; (step 3), &apos;error&apos; (step 4), &apos;default&apos; (step 7).&quot;
+                 check features
                </p>
 
 
@@ -243,12 +242,13 @@ export default function ChatFlowPage() {
           {/* Toggle Button */}
           <button
             onClick={() => setIsChatOpen(!isChatOpen)}
-            className="absolute -right-12 top-1/2 -translate-y-1/2 bg-gray-100 border border-gray-300 rounded-r-lg p-2 hover:bg-gray-200 shadow-md z-50"
+            className="fixed top-5 left-2 bg-gray-100 rounded-full p-2 hover:bg-gray-200 shadow-md z-50"
+            title={isChatOpen ? "Close Sidebar" : "Open Sidebar"}
           >
             {isChatOpen ? (
-              <ChevronLeft className="w-4 h-4" />
+              <MessageSquare className="w-4 h-4" />
             ) : (
-              <ChevronRight className="w-4 h-4" />
+               <MessageSquare className="w-4 h-4" />
             )}
           </button>
         </div>

@@ -40,6 +40,7 @@ const CustomNode = ({ data, id, onNodeUpdate }: CustomNodeProps) => {
   const [label, setLabel] = useState(data.label);
   const style = nodeStyles[data.messageType || "default"];
   const updateNodeInternals = useUpdateNodeInternals();
+  const [randomBgColor, setRandomBgColor] = useState<string | undefined>();
 
   // Use isExpanded from props, default to false if not provided
   const isExpanded = data.isExpanded ?? false;
@@ -47,6 +48,14 @@ const CustomNode = ({ data, id, onNodeUpdate }: CustomNodeProps) => {
   useEffect(() => {
     updateNodeInternals(id);
   }, [isExpanded, id, updateNodeInternals]);
+
+  useEffect(() => {
+    if (isExpanded) {
+      const colors = Object.values(nodeStyles).map(s => s.backgroundColor).filter(c => c !== style.backgroundColor);
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      setRandomBgColor(randomColor);
+    }
+  }, [isExpanded, style.backgroundColor]);
 
   const toggleExpand = (event: React.MouseEvent) => {
     event.stopPropagation();
@@ -122,10 +131,10 @@ const CustomNode = ({ data, id, onNodeUpdate }: CustomNodeProps) => {
           {isExpanded && (
             <div> 
               <div className="w-full mt-2">
-                {/* <h4 className="text-xs font-semibold text-gray-600">Description:</h4> */}
+                <h4 className="text-xs font-semibold text-gray-600">Description:</h4>
                 <p
-                  style={{ backgroundColor: style.backgroundColor }}
-                  className="nodrag mt-1 block w-full p-1 text-xs rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 font-mono overflow-hidden"
+                  style={{ backgroundColor: randomBgColor }}
+                  className="nodrag mt-1 block w-full p-1 text-xs rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 font-mono overflow-hidden break-words"
                 >
                   {description}
                 </p>

@@ -31,7 +31,7 @@ const FeaturesModal: React.FC<FeaturesModalProps> = ({ isOpen, onClose }) => {
         </button>
         <h2 className="text-2xl font-bold mb-4 text-gray-800">ChatFlow Features</h2>
         <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-2 text-gray-700">Features:</h3>
+          <h3 className="text-md font-semibold mb-2 text-gray-700">Features:</h3>
           <ul className="text-gray-600 space-y-1">
             {chatflowFeatures.map((feature, index) => (
               <li key={index}>
@@ -41,10 +41,10 @@ const FeaturesModal: React.FC<FeaturesModalProps> = ({ isOpen, onClose }) => {
           </ul>
         </div>
         <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-2 text-gray-700">Example Prompt:</h3>
+          <h3 className="text-md font-semibold mb-2 text-gray-700">Example Prompt:</h3>
           <div className="bg-gray-100 p-3 rounded-md text-sm text-gray-800 overflow-x-auto">
               <p className='bg-[#f3f4f6]'>
-                Draw a 7-step network troubleshooting flow. Connect nodes sequentially. Each node&apos;s `label` = step name. `data` includes `payload` with `description`. Assign `messageType` for each step: &apos;user&apos; (steps 1, 6), &apos;ai&apos; (steps 2, 5), &apos;success&apos; (step 3), &apos;error&apos; (step 4), &apos;default&apos; (step 7).
+                Draw a signup flow
               </p>
           </div>
         </div>

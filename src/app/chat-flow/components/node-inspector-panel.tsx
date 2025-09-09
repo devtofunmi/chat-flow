@@ -9,88 +9,105 @@ interface NodeInspectorPanelProps {
 }
 
 export function NodeInspectorPanel({ node, onClose, onNodeUpdate }: NodeInspectorPanelProps) {
-
+  const [internalNode, setInternalNode] = useState(node);
+  const [show, setShow] = useState(!!node);
   const [label, setLabel] = useState(node?.data?.label || '');
   const [messageType, setMessageType] = useState(node?.data?.messageType || 'default');
   const [description, setDescription] = useState(node?.data?.description || '');
 
   useEffect(() => {
     if (node) {
+      setInternalNode(node);
+      setShow(true);
       setLabel(node.data.label || '');
       setMessageType(node.data.messageType || 'default');
       setDescription(node.data.description || '');
-      
+    } else {
+      setShow(false);
     }
   }, [node]);
 
   const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newLabel = e.target.value;
     setLabel(newLabel);
-    onNodeUpdate(node!.id, { label: newLabel });
+    if (internalNode) {
+      onNodeUpdate(internalNode.id, { label: newLabel });
+    }
   };
 
   const handleMessageTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newMessageType = e.target.value;
     setMessageType(newMessageType);
-    onNodeUpdate(node!.id, { messageType: newMessageType });
+    if (internalNode) {
+      onNodeUpdate(internalNode.id, { messageType: newMessageType });
+    }
   };
 
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newDescription = e.target.value;
     setDescription(newDescription);
-    onNodeUpdate(node!.id, { description: newDescription });
+    if (internalNode) {
+      onNodeUpdate(internalNode.id, { description: newDescription });
+    }
   };
 
-  
-
-  if (!node) {
-    return null;
-  }
+  const onTransitionEnd = () => {
+    if (!show) {
+      setInternalNode(null);
+    }
+  };
 
   return (
-    <div className="absolute top-0 right-0 w-[350px] h-full bg-white border-l border-gray-200 shadow-lg p-5 box-border z-10 overflow-y-auto font-mono text-xs text-gray-800">
-      <button onClick={onClose} className="absolute top-2.5 right-2.5  p-2 rounded-full bg-transparent border-none text-lg cursor-pointer"><X className="w-4 h-4" /></button>
-              <h3>Node Details</h3>
-              <hr />
-              <div className="mb-2 mt-2">
-                <strong>ID:</strong> {node.id}
-              </div>
-              <div className="mb-4">
-                <label htmlFor="node-label" className="block text-sm font-medium text-gray-700">Label:</label>
-                <input
-                  type="text"
-                  id="node-label"
-                  value={label}
-                  onChange={handleLabelChange}
-                  className="mt-1 block w-full h-8  p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                />
-              </div>
-              <div className="mb-4">
-                <label htmlFor="message-type" className="block text-sm font-medium text-gray-700">Message Type:</label>
-                <select
-                  id="message-type"
-                  value={messageType}
-                  onChange={handleMessageTypeChange}
-                  className="mt-1 block w-full h-8  p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                >
-                  <option value="default">Default</option>
-                  <option value="user">User</option>
-                  <option value="ai">AI</option>
-                  <option value="success">Success</option>
-                  <option value="error">Error</option>
-                </select>
-              </div>
-              <div className="mb-4">
-                <label htmlFor="node-description" className="block text-sm font-medium text-gray-700">Description:</label>
-                <textarea
-                  id="node-description"
-                  value={description}
-                  onChange={handleDescriptionChange}
-                  className="mt-1 block w-full p-2 rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 font-mono text-xs"
-                  rows={4}
-                />
-              </div>
-              
+    <div
+      onTransitionEnd={onTransitionEnd}
+      className={`absolute top-0 right-0 h-full bg-white border-l border-gray-200 shadow-lg box-border z-10 overflow-hidden font-mono text-xs text-gray-800 transition-all duration-300 ease-in-out ${show ? 'w-[350px]' : 'w-0'}`}>
+      <div className="w-[350px] p-5">
+        {internalNode && (
+          <>
+            <button onClick={onClose} className="absolute top-2.5 right-2.5  p-2 rounded-full bg-transparent border-none text-lg cursor-pointer"><X className="w-4 h-4" /></button>
+            <h3>Node Details</h3>
+            <hr />
+            <div className="mb-2 mt-2">
+              <strong>ID:</strong> {internalNode.id}
+            </div>
+            <div className="mb-4">
+              <label htmlFor="node-label" className="block text-sm font-medium text-gray-700">Label:</label>
+              <input
+                type="text"
+                id="node-label"
+                value={label}
+                onChange={handleLabelChange}
+                className="mt-1 block w-full h-8  p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              />
+            </div>
+            <div className="mb-4">
+              <label htmlFor="message-type" className="block text-sm font-medium text-gray-700">Message Type:</label>
+              <select
+                id="message-type"
+                value={messageType}
+                onChange={handleMessageTypeChange}
+                className="mt-1 block w-full h-8  p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              >
+                <option value="default">Default</option>
+                <option value="user">User</option>
+                <option value="ai">AI</option>
+                <option value="success">Success</option>
+                <option value="error">Error</option>
+              </select>
+            </div>
+            <div className="mb-4">
+              <label htmlFor="node-description" className="block text-sm font-medium text-gray-700">Description:</label>
+              <textarea
+                id="node-description"
+                value={description}
+                onChange={handleDescriptionChange}
+                className="mt-1 block w-full p-2 rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 font-mono text-xs"
+                rows={4}
+              />
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

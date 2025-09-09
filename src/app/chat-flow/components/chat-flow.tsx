@@ -21,7 +21,7 @@ import CustomNode, { CustomNodeProps } from './CustomNode';
 import { NodeInspectorPanel } from './node-inspector-panel';
 import dagre from 'dagre';
 
-export type AppNode = Node<{ label: string; messageType?: string; payload?: object; }>;
+export type AppNode = Node<{ label: string; messageType?: string; description?: string; }>;
 
 // --- Dagre layouting setup ---
 const nodeWidth = 160;
@@ -231,7 +231,7 @@ export function useFlowState() {
         [setEdges]
     );
 
-    const addNode = useCallback(({ id, data, x, y }: { id: string, data: { label: string; messageType?: string }, x: number, y: number }) => {
+    const addNode = useCallback(({ id, data, x, y }: { id: string, data: { label: string; messageType?: string; description?: string }, x: number, y: number }) => {
         const newNode: AppNode = {
             id,
             type: 'custom',

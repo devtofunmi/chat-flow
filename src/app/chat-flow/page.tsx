@@ -139,8 +139,8 @@ export default function ChatFlowPage() {
           data: z.object({
             label: z.string().describe("The text to display on the node."),
             messageType: z.string().optional().describe("The type of message (e.g., 'user', 'ai', 'success', 'error')."),
-            payload: z.any().optional().describe("The detailed payload for the node."),
-          }).describe("The data payload for the node."),
+            description: z.string().optional().describe("A detailed description for the node."), // Changed from payload to description
+          }).describe("The data for the node."), // Updated description
           x: z.number().describe("The x-coordinate for the node's position."),
           y: z.number().describe("The y-coordinate for the node's position."),
         })

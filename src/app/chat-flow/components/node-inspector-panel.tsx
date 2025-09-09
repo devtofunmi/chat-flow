@@ -9,20 +9,17 @@ interface NodeInspectorPanelProps {
 }
 
 export function NodeInspectorPanel({ node, onClose, onNodeUpdate }: NodeInspectorPanelProps) {
-  console.log(`[NodeInspectorPanel] Rendered. Node ID: ${node?.id}, Payload:`, node?.data?.payload);
 
   const [label, setLabel] = useState(node?.data?.label || '');
   const [messageType, setMessageType] = useState(node?.data?.messageType || 'default');
-  const [payload, setPayload] = useState(JSON.stringify(node?.data?.payload || {}, null, 2));
-  const [payloadError, setPayloadError] = useState<string | null>(null);
+  const [description, setDescription] = useState(node?.data?.description || '');
 
   useEffect(() => {
-    console.log(`[NodeInspectorPanel] useEffect triggered. Node ID: ${node?.id}, Payload:`, node?.data?.payload);
     if (node) {
       setLabel(node.data.label || '');
       setMessageType(node.data.messageType || 'default');
-      setPayload(JSON.stringify(node.data.payload || {}, null, 2));
-      setPayloadError(null);
+      setDescription(node.data.description || '');
+      
     }
   }, [node]);
 
@@ -38,17 +35,13 @@ export function NodeInspectorPanel({ node, onClose, onNodeUpdate }: NodeInspecto
     onNodeUpdate(node!.id, { messageType: newMessageType });
   };
 
-  const handlePayloadChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newPayload = e.target.value;
-    setPayload(newPayload);
-    try {
-      const parsedPayload = JSON.parse(newPayload);
-      setPayloadError(null);
-      onNodeUpdate(node!.id, { payload: parsedPayload });
-    } catch {
-      setPayloadError('Invalid JSON');
-    }
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newDescription = e.target.value;
+    setDescription(newDescription);
+    onNodeUpdate(node!.id, { description: newDescription });
   };
+
+  
 
   if (!node) {
     return null;
@@ -87,14 +80,17 @@ export function NodeInspectorPanel({ node, onClose, onNodeUpdate }: NodeInspecto
                   <option value="error">Error</option>
                 </select>
               </div>
-              <h4 className="mt-5">Payload (node.data.payload)</h4>
-              <textarea
-                value={payload}
-                onChange={handlePayloadChange}
-                className={`mt-1 block w-full p-2 rounded-md border ${payloadError ? 'border-red-500' : 'border-gray-300'} shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 font-mono text-xs`}
-                rows={10}
-              />
-              {payloadError && <p className="text-red-500 text-xs mt-1">{payloadError}</p>}
+              <div className="mb-4">
+                <label htmlFor="node-description" className="block text-sm font-medium text-gray-700">Description:</label>
+                <textarea
+                  id="node-description"
+                  value={description}
+                  onChange={handleDescriptionChange}
+                  className="mt-1 block w-full p-2 rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 font-mono text-xs"
+                  rows={4}
+                />
+              </div>
+              
     </div>
   );
 }

@@ -6,8 +6,8 @@ export interface CustomNodeProps extends NodeProps {
   data: {
     label: string;
     messageType?: string;
-    payload?: object;
     isExpanded?: boolean;
+    description?: string; // Added description field
   };
   onNodeUpdate: (nodeId: string, newData: Partial<Node['data']>) => void;
 }
@@ -78,7 +78,16 @@ const CustomNode = ({ data, id, onNodeUpdate }: CustomNodeProps) => {
     }
   };
 
-  
+  const [description, setDescription] = useState(data.description || "");
+
+  useEffect(() => {
+    setDescription(data.description || "");
+  }, [data.description]);
+
+  const handleDescriptionChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setDescription(event.target.value);
+    onNodeUpdate(id, { description: event.target.value });
+  };
 
   return (
     <div
@@ -103,28 +112,36 @@ const CustomNode = ({ data, id, onNodeUpdate }: CustomNodeProps) => {
           autoFocus
         />
       ) : (
-        <div className="!text-gray-800 text-sm flex items-center justify-center flex-1">{data.label}</div>
+        <>
+          <div className="!text-gray-800 text-sm flex items-center justify-center flex-1 relative"> {/* Added relative positioning */}
+            {data.label}
+            <button onClick={toggleExpand} className="absolute right-0 top-0 p-1 rounded-full hover:bg-gray-200"> {/* Absolute positioning */}
+              {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </button>
+          </div>
+          {isExpanded && (
+            <div> {/* This div will wrap both description and dropdown */}
+              <div className="w-full mt-2">
+                <h4 className="text-xs font-semibold text-gray-600">Description:</h4>
+                <textarea
+                  value={description}
+                  onChange={handleDescriptionChange}
+                  className="nodrag mt-1 block w-full p-1 text-xs rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 font-mono overflow-hidden"
+                  rows={4}
+                  readOnly // Added readOnly attribute
+                />
+              </div>
+             
+            </div>
+          )}
+        </>
       )}
       
-      {data.payload && (
-        <button
-          onClick={toggleExpand}
-          className="absolute top-1 right-1 p-1 rounded-full hover:bg-gray-200"
-          style={{ lineHeight: 0 }}
-        >
-          {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        </button>
-      )}
+      
 
       
 
-      {isExpanded && data.payload && (
-        <div className="mt-2 text-xs text-gray-700 text-left w-full overflow-auto">
-          <pre className="bg-gray-100 p-1 rounded overflow-auto text-left" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-            <code>{JSON.stringify(data.payload, null, 2)}</code>
-          </pre>
-        </div>
-      )}
+      
 
       <Handle
         type="target"

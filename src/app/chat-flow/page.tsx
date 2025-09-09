@@ -243,7 +243,7 @@ export default function ChatFlowPage() {
           {/* Toggle Button */}
           <button
             onClick={() => setIsChatOpen(!isChatOpen)}
-            className="absolute -right-10 top-1/2 -translate-y-1/2 bg-white border border-gray-200 rounded-r-lg p-2 hover:bg-gray-50"
+            className="absolute -right-12 top-1/2 -translate-y-1/2 bg-gray-100 border border-gray-300 rounded-r-lg p-2 hover:bg-gray-200 shadow-md z-50"
           >
             {isChatOpen ? (
               <ChevronLeft className="w-4 h-4" />

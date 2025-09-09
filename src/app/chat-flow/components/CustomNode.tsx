@@ -38,7 +38,7 @@ const nodeStyles: { [key: string]: React.CSSProperties } = {
 const CustomNode = ({ data, id, onNodeUpdate }: CustomNodeProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [label, setLabel] = useState(data.label);
-  const style = nodeStyles[data.messageType || "default"];
+  const style = (data.messageType && nodeStyles[data.messageType]) || nodeStyles.default;
   const updateNodeInternals = useUpdateNodeInternals();
   const [randomBgColor, setRandomBgColor] = useState<string | undefined>();
 

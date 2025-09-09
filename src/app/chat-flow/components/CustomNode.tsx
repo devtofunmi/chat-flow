@@ -113,9 +113,9 @@ const CustomNode = ({ data, id, onNodeUpdate }: CustomNodeProps) => {
         />
       ) : (
         <>
-          <div className="!text-gray-800 text-sm flex items-center justify-center flex-1 relative"> {/* Added relative positioning */}
+          <div className="!text-gray-800 text-sm flex items-center justify-center flex-1 "> {/* Added relative positioning */}
             {data.label}
-            <button onClick={toggleExpand} className="absolute right-0 top-0 p-1 rounded-full hover:bg-gray-200"> {/* Absolute positioning */}
+            <button onClick={toggleExpand} className="absolute right-2 top-1 rounded-full hover:bg-gray-200"> {/* Absolute positioning */}
               {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </button>
           </div>

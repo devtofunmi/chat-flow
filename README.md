@@ -4,7 +4,7 @@ Talk to your flowchart editor like you would to a friend: "add a node called 'St
 
 ## Demo
 
-[![Watch the demo video](https://img.youtube.com/vi/epax5s5Eu7k/0.jpg)](https://www.youtube.com/watch?v=epax5s5Eu7k)
+[![Watch the demo video](https://img.youtube.com/vi/58YibjjetT4/0.jpg)](https://youtu.be/58YibjjetT4)
 
 ## Live Demo (try it out!)
 https://chatt-flow.vercel.app/

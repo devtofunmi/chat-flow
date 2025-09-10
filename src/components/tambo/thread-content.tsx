@@ -54,6 +54,7 @@ export interface ThreadContentProps
   extends React.HTMLAttributes<HTMLDivElement> {
   /** The child elements to render within the container. */
   children?: React.ReactNode;
+  variant?: string;
 }
 
 /**

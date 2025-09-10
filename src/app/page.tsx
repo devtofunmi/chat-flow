@@ -13,7 +13,7 @@ import {
 } from "@/components/tambo/thread-content";
 import { components, tools as staticTools } from "@/lib/tambo";
 import { TamboProvider, TamboTool } from "@tambo-ai/react";
-import { ChevronRight, Menu, MessageSquare } from "lucide-react";
+import {  MessageSquare } from "lucide-react";
 import { useState, useRef } from "react";
 import { ChatFlow, useFlowState } from "@/app/components/chat-flow";
 import { z } from "zod";
@@ -182,9 +182,7 @@ export default function ChatFlowPage() {
             in an environment file.
           </p>
           <p className="mt-2 text-xs text-gray-500">
-            You can copy{" "}
-            <code className="font-mono bg-gray-200 rounded px-1">example.env.local</code> to{" "}
-            <code className="font-mono bg-gray-200 rounded px-1">.env.local</code> and add your key there.
+            <code className="font-mono bg-gray-200 rounded px-1">.env.local</code> add your key there.
           </p>
         </div>
       </div>

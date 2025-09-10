@@ -132,6 +132,7 @@ const MessageBubble = React.forwardRef<
     </div>
   );
 });
+MessageBubble.displayName = "Message.Bubble";
 
 export interface MessageRenderedComponentAreaProps
   extends React.HTMLAttributes<HTMLDivElement> {

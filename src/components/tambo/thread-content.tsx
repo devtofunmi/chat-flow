@@ -160,9 +160,6 @@ const ThreadContentMessages = React.forwardRef<
                       ? "text-primary font-sans"
                       : "text-primary bg-container hover:bg-backdrop font-sans"
                   }
-                  isFinalAssistantMessage={
-                    message.role === "assistant" && index === messages.length - 1
-                  }
                 />
                 <MessageRenderedComponentArea className="w-full" />
               </div>

@@ -4,8 +4,6 @@ import {
   Message,
   MessageContent,
   MessageRenderedComponentArea,
-  ToolcallInfo,
-  type messageVariants,
 } from "@/components/tambo/message";
 import { cn } from "@/lib/utils";
 import { type TamboThreadMessage, useTambo } from "@tambo-ai/react";
@@ -23,7 +21,6 @@ interface ThreadContentContextValue {
   messages: TamboThreadMessage[];
   isGenerating: boolean;
   generationStage?: string;
-  variant?: VariantProps<typeof messageVariants>["variant"];
 }
 
 /**
@@ -55,8 +52,6 @@ const useThreadContentContext = () => {
  */
 export interface ThreadContentProps
   extends React.HTMLAttributes<HTMLDivElement> {
-  /** Optional styling variant for the message container */
-  variant?: VariantProps<typeof messageVariants>["variant"];
   /** The child elements to render within the container. */
   children?: React.ReactNode;
 }
@@ -73,7 +68,7 @@ export interface ThreadContentProps
  * ```
  */
 const ThreadContent = React.forwardRef<HTMLDivElement, ThreadContentProps>(
-  ({ children, className, variant, ...props }, ref) => {
+  ({ children, className, ...props }, ref) => {
     const { thread, generationStage, isIdle } = useTambo();
     const isGenerating = !isIdle;
 
@@ -82,9 +77,8 @@ const ThreadContent = React.forwardRef<HTMLDivElement, ThreadContentProps>(
         messages: thread?.messages ?? [],
         isGenerating,
         generationStage,
-        variant,
       }),
-      [thread?.messages, isGenerating, generationStage, variant],
+      [thread?.messages, isGenerating, generationStage],
     );
 
     return (
@@ -124,7 +118,7 @@ const ThreadContentMessages = React.forwardRef<
   HTMLDivElement,
   ThreadContentMessagesProps
 >(({ className, ...props }, ref) => {
-  const { messages, isGenerating, variant } = useThreadContentContext();
+  const { messages, isGenerating } = useThreadContentContext();
 
   return (
     <div
@@ -147,7 +141,6 @@ const ThreadContentMessages = React.forwardRef<
             <Message
               role={message.role === "assistant" ? "assistant" : "user"}
               message={message}
-              variant={variant}
               isLoading={isGenerating && index === messages.length - 1}
               className={cn(
                 "flex w-full",
@@ -166,8 +159,10 @@ const ThreadContentMessages = React.forwardRef<
                       ? "text-primary font-sans"
                       : "text-primary bg-container hover:bg-backdrop font-sans"
                   }
+                  isFinalAssistantMessage={
+                    message.role === "assistant" && index === messages.length - 1
+                  }
                 />
-                <ToolcallInfo />
                 <MessageRenderedComponentArea className="w-full" />
               </div>
             </Message>

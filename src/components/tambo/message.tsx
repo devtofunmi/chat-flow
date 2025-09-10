@@ -26,7 +26,7 @@ const Message = React.forwardRef<HTMLDivElement, MessageProps>(
         <div
           ref={ref}
           className={cn(
-            "flex w-full my-2 bg-transparent", 
+            "flex w-full my-2 bg-transparent",
             role === "assistant" ? "justify-start" : "justify-end",
             className,
           )}
@@ -56,7 +56,7 @@ const MessageContent = React.forwardRef<
   return (
     <div
       ref={ref}
-      className={cn("flex flex-col ",)}
+      className={cn("flex flex-col w-full",)}
       data-slot="message-content"
       {...props}
     >
@@ -90,7 +90,7 @@ const MessageBubble = React.forwardRef<
     >
       {isUser ? (
         // USER STYLE (pill bubble with px, py, rounded-full)
-        <div className="px-4 py-2 rounded-full bg-gray-100 text-gray-900  rounded-full">
+        <div className="px-4 py-2 rounded-full bg-gray-100 text-gray-900">
           {message.content?.map((part, idx) =>
             part.type === "text" ? (
               <span key={idx}>{part.text}</span>
@@ -102,7 +102,7 @@ const MessageBubble = React.forwardRef<
         <div className="flex items-start gap-2">
           <div className="flex flex-col">
             {isLoading ? (
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full">
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100">
                 <div className="h-2 w-2 animate-pulse rounded-full bg-muted-foreground" />
                 <div className="h-2 w-2 animate-pulse rounded-full bg-muted-foreground delay-75" />
                 <div className="h-2 w-2 animate-pulse rounded-full bg-muted-foreground delay-150" />

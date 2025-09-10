@@ -17,7 +17,7 @@ https://chatt-flow.vercel.app/
     *   Add new nodes with custom labels and descriptions.
     *   Connect nodes to define relationships.
     *   Delete individual nodes and their connected edges.
-    *   Regenerate node content (if applicable).
+    
     *   Update node data through an inspector panel.
 *   **Layout Recalculation:** Automatically re-arrange nodes for better readability.
 *   **Flow Import/Export:**

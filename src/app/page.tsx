@@ -37,7 +37,6 @@ export default function ChatFlowPage() {
     clearFlow,
     recalculateLayout,
     deleteNodeAndConnectedElements,
-    regenerateNode,
     updateNodeData,
     setFlow,
   } = useFlowState();
@@ -277,8 +276,7 @@ export default function ChatFlowPage() {
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             onDeleteNode={deleteNodeAndConnectedElements} 
-            onRegenerateNode={regenerateNode}         
-                        updateNodeData={updateNodeData}
+            updateNodeData={updateNodeData}
             setFlow={setFlow}
           />
           <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center z-10">

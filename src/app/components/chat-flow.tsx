@@ -81,7 +81,7 @@ interface ChatFlowProps {
   onEdgesChange: OnEdgesChange;
   onConnect: OnConnect;
   onDeleteNode: (nodeId: string) => void;
-  onRegenerateNode: (nodeId: string) => void;
+  
   updateNodeData: (nodeId: string, newData: Partial<AppNode['data']>) => void;
   setFlow: (flow: { nodes: AppNode[], edges: Edge[] }) => void;
 }
@@ -104,7 +104,6 @@ export const ChatFlow = forwardRef<HTMLDivElement, ChatFlowProps>(function ChatF
     onEdgesChange,
     onConnect,
     onDeleteNode,
-    onRegenerateNode,
     updateNodeData,
   },
   ref
@@ -155,9 +154,7 @@ export const ChatFlow = forwardRef<HTMLDivElement, ChatFlowProps>(function ChatF
 
   const handleContextMenuItemClick = (action: string, nodeId: string) => {
     switch (action) {
-      case 'regenerate':
-        onRegenerateNode(nodeId);
-        break;
+      
       case 'delete':
         onDeleteNode(nodeId);
         break;
@@ -274,10 +271,7 @@ export function useFlowState() {
         console.log(`Deleted node ${nodeId} and its connected edges.`);
     }, [setNodes, setEdges]);
 
-    const regenerateNode = useCallback((nodeId: string) => {
-        console.log(`Regenerating from node: ${nodeId}. (Not yet implemented: actual AI regeneration)`);
-        setEdges((eds) => eds.filter((edge) => edge.source !== nodeId));
-    }, [setEdges]);
+    
 
     const updateNodeData = useCallback((nodeId: string, newData: Partial<AppNode['data']>) => {
         setNodes((nds) =>
@@ -310,7 +304,6 @@ export function useFlowState() {
         clearFlow, 
         recalculateLayout,
         deleteNodeAndConnectedElements,
-        regenerateNode,
         updateNodeData, 
         setFlow,
     };

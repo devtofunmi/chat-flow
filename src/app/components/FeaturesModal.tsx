@@ -14,7 +14,7 @@ const FeaturesModal: React.FC<FeaturesModalProps> = ({ isOpen, onClose }) => {
     ,
     "Dynamic Flow Control: Clear the entire flow with a simple command ('Clear the flow') and optimize node arrangement with automatic layout recalculation.",
     "Comprehensive Node Inspection: Easily view and edit node properties through a dedicated inspection panel, ensuring precise control over your chat flow.",
-    "Contextual Node Actions: Access advanced options like regenerating content or deleting nodes via a right-click context menu for efficient workflow management.",
+    "Contextual Node Actions: Access advanced options like deleting nodes via a right-click context menu for efficient workflow management.",
     "Seamless Data Handling: Export and import your chat flow configurations in JSON format, and generate high-quality PNG images for documentation or sharing.",
   ];
 

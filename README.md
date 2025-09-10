@@ -1,148 +1,127 @@
-# Tambo Template
+# Tambo AI Chat Flow Template
 
-This is a starter NextJS app with Tambo hooked up to get your AI app development started quickly.
+This template provides a dynamic and interactive chat flow builder, powered by Tambo AI. It allows developers to rapidly prototype and visualize conversational flows, process pipelines, or any sequence of interconnected steps, using natural language commands. The core idea is to bridge the gap between conceptual design and a working visual representation quickly and effectively.
 
-## Get Started
+## Features
 
-1. Run `npm create-tambo@latest my-tambo-app` for a new project
+*   **AI-Driven Flow Creation:** Utilize Tambo AI to build and modify flowcharts using natural language prompts. The AI can add nodes, connect them with edges, and clear the entire flow.
+*   **Interactive Visual Editor:** Built with React Flow, offering a drag-and-drop interface for nodes and edges, zoom, pan, and selection capabilities.
+*   **Node Manipulation:**
+    *   Add new nodes with custom labels and descriptions.
+    *   Connect nodes to define relationships.
+    *   Delete individual nodes and their connected edges.
+    *   Regenerate node content (if applicable).
+    *   Update node data through an inspector panel.
+*   **Layout Recalculation:** Automatically re-arrange nodes for better readability.
+*   **Flow Import/Export:**
+    *   Export the current flow structure (nodes and edges) as a JSON file.
+    *   Export a visual snapshot of the flow as a PNG image.
+    *   Import a flow from a JSON file, enabling easy sharing and versioning.
+*   **Integrated Chat Interface:** A sidebar for interacting with the Tambo AI, sending commands, and receiving feedback.
+*   **Features Modal:** A dedicated modal to explain the template's functionalities to the user.
 
-2. `npm install`
+## How It Works
 
-3. `npx tambo init`
+This template leverages several key technologies to deliver its functionality:
 
-- or rename `example.env.local` to `.env.local` and add your tambo API key you can get for free [here](https://tambo.co/dashboard).
+1.  **Tambo AI (`@tambo-ai/react`):** The heart of the AI interaction. The `TamboProvider` wraps the application, enabling the AI to understand and execute predefined "tools."
+2.  **AI Tools (`flowTools`):** Specific functions (`addNode`, `addEdge`, `clearFlow`) are exposed to the Tambo AI. These tools are defined with `zod` schemas, allowing the AI to understand their parameters and how to use them to manipulate the flowchart. When you type a command like "add a node called 'Start' at 100,100", Tambo AI calls the `addNode` tool with the appropriate arguments.
+3.  **React Flow:** Provides the visual canvas for the flowchart. It handles rendering nodes and edges, user interactions (dragging, zooming), and layout.
+4.  **`useFlowState`:** A custom hook (defined in `./components/chat-flow.tsx`) that manages the state of the nodes and edges for the React Flow instance. It provides functions to modify the flow, which are then exposed as AI tools.
+5.  **Next.js:** The framework for the application, providing routing, API key handling, and server-side rendering capabilities.
+6.  **Tailwind CSS:** Used for styling, ensuring a consistent and modern look with utility-first classes.
 
-4. Run `npm run dev` and go to `localhost:3000` to use the app!
+## Getting Started
 
-## Customizing
+Follow these steps to get the Chat Flow template up and running on your local machine.
 
-### Change what components tambo can control
+### Prerequisites
 
-You can see how the `Graph` component is registered with tambo in `src/lib/tambo.ts`:
+*   Node.js (v18 or higher)
+*   npm or yarn
 
-```tsx
-const components: TamboComponent[] = [
-  {
-    name: "Graph",
-    description:
-      "A component that renders various types of charts (bar, line, pie) using Recharts. Supports customizable data visualization with labels, datasets, and styling options.",
-    component: Graph,
-    propsSchema: z.object({
-      data: z
-        .object({
-          type: z
-            .enum(["bar", "line", "pie"])
-            .describe("Type of graph to render"),
-          labels: z.array(z.string()).describe("Labels for the graph"),
-          datasets: z
-            .array(
-              z.object({
-                label: z.string().describe("Label for the dataset"),
-                data: z
-                  .array(z.number())
-                  .describe("Data points for the dataset"),
-                color: z
-                  .string()
-                  .optional()
-                  .describe("Optional color for the dataset"),
-              }),
-            )
-            .describe("Data for the graph"),
-        })
-        .describe("Data object containing chart configuration and values"),
-      title: z.string().optional().describe("Optional title for the chart"),
-      showLegend: z
-        .boolean()
-        .optional()
-        .describe("Whether to show the legend (default: true)"),
-      variant: z
-        .enum(["default", "solid", "bordered"])
-        .optional()
-        .describe("Visual style variant of the graph"),
-      size: z
-        .enum(["default", "sm", "lg"])
-        .optional()
-        .describe("Size of the graph"),
-    }),
-  },
-  // Add more components for Tambo to control here!
-];
+### Installation
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/devtofunmi/tambo-temp
+    cd tambo-temp/src/app/chat-flow
+    ```
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    # or
+    yarn install
+    ```
+3.  **Configure your Tambo API Key:**
+    Copy the example environment file:
+    ```bash
+    cp example.env.local .env.local
+    ```
+    Open `.env.local` and add your Tambo API Key:
+    ```
+    NEXT_PUBLIC_TAMBO_API_KEY=your_tambo_api_key_here
+    ```
+    You can obtain a Tambo API key from [Tambo AI website](https://tambo.co).
+
+4.  **Run the development server:**
+    ```bash
+    npm run dev
+    # or
+    yarn dev
+    ```
+    Open [http://localhost:3000/chat-flow](http://localhost:3000/chat-flow) in your browser to see the application.
+
+## How to Adapt and Extend
+
+This template is designed to be a starting point. Here's how you can adapt it to your needs:
+
+### 1. Adding Custom Nodes
+
+To create new types of nodes for your specific use cases:
+
+*   **Define a new React component** for your custom node's UI (e.g., `CustomNode.tsx` in `components/`).
+*   **Register your custom node** in `src/app/chat-flow/components/chat-flow.tsx` by adding it to the `nodeTypes` object passed to `ReactFlow`.
+*   **Update the `addNode` AI tool's schema** in `src/app/chat-flow/page.tsx` to include any new `messageType` or `data` properties relevant to your custom node.
+
+### 2. Creating New AI Tools
+
+Extend Tambo AI's capabilities by exposing more functions as tools:
+
+*   **Identify a function** in your application logic (e.g., in `useFlowState` or a utility file) that you want the AI to be able to call.
+*   **Define a new `TamboTool` object** in `src/app/chat-flow/page.tsx` within the `flowTools` array.
+*   **Provide a clear `name` and `description`** for the tool.
+*   **Define its `toolSchema` using `zod`** to specify the expected arguments and return type. This is crucial for the AI to understand how to use your tool.
+*   **Add the new tool** to the `allTools` array.
+
+Example: You could add a tool `connectNodes(sourceId: string, targetId: string)` if you wanted the AI to explicitly connect nodes by their IDs.
+
+### 3. Modifying UI and Styling
+
+*   **Tailwind CSS:** Adjust the `tailwind.config.ts` file to customize your design system (colors, fonts, spacing).
+*   **Component Styling:** Modify the Tailwind classes directly within the JSX of components like `page.tsx`, `chat-flow.tsx`, `CustomNode.tsx`, or `node-inspector-panel.tsx`.
+*   **Custom Components:** Replace or extend existing UI components with your own to match your application's aesthetic.
+
+### 4. Integrating with Backend Services
+
+*   The `TamboProvider` can be configured with a `tamboUrl` to point to your own Tambo backend instance.
+*   You can create new AI tools that make API calls to your backend services, allowing the AI to orchestrate complex operations.
+
+## File Structure Overview
+
+```
+src/app/chat-flow/
+├── page.tsx                  # Main page for the chat flow, integrates all components and Tambo AI.
+├── components/
+│   ├── chat-flow.tsx         # React Flow setup, handles node/edge rendering and interactions.
+│   ├── CustomNode.tsx        # Example of a custom node component.
+│   ├── FeaturesModal.tsx     # Modal to explain template features.
+│   ├── node-inspector-panel.tsx # Panel to view/edit selected node properties.
+│   └── NodeContextMenu.tsx   # Context menu for nodes (e.g., delete, regenerate).
+└── README.md                 # This file.
 ```
 
-You can install this graph component into any project with:
+## Conclusion
 
-```bash
-npx tambo add graph
-```
+This Tambo AI Chat Flow template offers a powerful starting point for building intelligent, interactive applications. By understanding how Tambo AI interacts with the UI through defined tools, you can rapidly develop complex systems that respond to natural language commands. I encourage you to explore, adapt, and extend this template to bring your unique concepts to life!
 
-The example Graph component demonstrates several key features:
-
-- Different prop types (strings, arrays, enums, nested objects)
-- Multiple chart types (bar, line, pie)
-- Customizable styling (variants, sizes)
-- Optional configurations (title, legend, colors)
-- Data visualization capabilities
-
-Update the `components` array with any component(s) you want tambo to be able to use in a response!
-
-You can find more information about the options [here](https://tambo.co/docs/concepts/registering-components)
-
-### Add tools for tambo to use
-
-```tsx
-export const tools: TamboTool[] = [
-  {
-    name: "globalPopulation",
-    description:
-      "A tool to get global population trends with optional year range filtering",
-    tool: getGlobalPopulationTrend,
-    toolSchema: z.function().args(
-      z
-        .object({
-          startYear: z.number().optional(),
-          endYear: z.number().optional(),
-        })
-        .optional(),
-    ),
-  },
-];
-```
-
-Find more information about tools [here.](https://tambo.co/docs/concepts/tools)
-
-### The Magic of Tambo Requires the TamboProvider
-
-Make sure in the TamboProvider wrapped around your app:
-
-```tsx
-...
-<TamboProvider
-  apiKey={process.env.NEXT_PUBLIC_TAMBO_API_KEY!}
-  components={components} // Array of components to control
-  tools={tools} // Array of tools it can use
->
-  {children}
-</TamboProvider>
-```
-
-In this example we do this in the `Layout.tsx` file, but you can do it anywhere in your app that is a client component.
-
-### Change where component responses are shown
-
-The components used by tambo are shown alongside the message resopnse from tambo within the chat thread, but you can have the result components show wherever you like by accessing the latest thread message's `renderedComponent` field:
-
-```tsx
-const { thread } = useTambo();
-const latestComponent =
-  thread?.messages[thread.messages.length - 1]?.renderedComponent;
-
-return (
-  <div>
-    {latestComponent && (
-      <div className="my-custom-wrapper">{latestComponent}</div>
-    )}
-  </div>
-);
-```
-
-For more detailed documentation, visit [Tambo's official docs](https://docs.tambo.co).

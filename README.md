@@ -43,8 +43,8 @@ This app demonstrates the power of Tambo AI for building conversational interfac
 ## Run Locally
 
 ```bash
-git clone https://github.com/devtofunmi/tambo-temp
-cd tambo-temp
+git clone https://github.com/devtofunmi/chat-flow
+cd chat-flow
 npm install
 npx tambo init
 npm run dev

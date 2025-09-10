@@ -1,4 +1,4 @@
-# A Natural Language Interface for Building Flowcharts
+# Tambo Template: A Natural Language Interface for Building Flowcharts
 
 Talk to your flowchart editor like you would to a friend: "add a node called 'Start'", "connect 'Start' to a new node 'Step 2'". or draw a signup flow chat The AI understands context and builds a visual flowchart for you. It can update and manage your flowchart as you go.
 

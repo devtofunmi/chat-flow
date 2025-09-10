@@ -4,7 +4,7 @@ Talk to your flowchart editor like you would to a friend: "add a node called 'St
 
 ## Demo
 
-*A screen recording of the application in use would go here.*
+*A screen recording *
 
 ## Live Demo (try it out!)
 https://chatt-flow.vercel.app/
